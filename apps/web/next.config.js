@@ -48,6 +48,16 @@ const turbopackRoot =
     ? commonAncestor(fs.realpathSync(__dirname), eeRealDir)
     : undefined
 
+// Backend origin used by the same-origin API proxy below. Defaults to the
+// bundled single-container layout (uvicorn on 9000 next to Next on 8000) and
+// can be pointed elsewhere at BUILD time with --build-arg
+// LEARNHOUSE_INTERNAL_API_URL. Baked into routes-manifest, so a runtime env
+// change does not take effect — services/config/config.ts reads the same var at
+// runtime for server-side fetches.
+const internalApiOrigin = (
+  process.env.LEARNHOUSE_INTERNAL_API_URL || 'http://127.0.0.1:9000'
+).replace(/\/+$/, '')
+
 /** @type {import('common.next').NextConfig} */
 const nextConfig = {
   // Required by PostHog's reverse-proxy rewrites below so the trailing-slash
@@ -55,6 +65,13 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   async rewrites() {
     return [
+      // Same-origin API proxy. Lets NEXT_PUBLIC_LEARNHOUSE_API_URL be the
+      // relative "/api/v1/": the browser calls the Next.js origin, this rewrite
+      // forwards to the backend, and the session cookie is never cross-origin.
+      {
+        source: '/api/v1/:path*',
+        destination: `${internalApiOrigin}/api/v1/:path*`,
+      },
       // PostHog reverse proxy (EU cloud), served same-origin so adblockers
       // don't strip ingestion. The client SDK points at api_host: '/ingest'.
       {
