@@ -8,6 +8,13 @@ general:
   # SECURITY: default to production-safe; enable with LEARNHOUSE_DEVELOPMENT_MODE=true for local dev.
   development_mode: false
 
+  # Require an email+password signup to confirm its address before it can sign
+  # in. SaaS always requires it. A self-hosted install opts in with
+  # LEARNHOUSE_EMAIL_VERIFICATION=true, which needs a working mailer
+  # (mailing_config below) or nobody can ever verify. The login page offers a
+  # resend, so a failed send is recoverable.
+  email_verification: false
+
 security:
   # SECURITY: Set via LEARNHOUSE_AUTH_JWT_SECRET_KEY env var (required, min 32 chars).
   # Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"

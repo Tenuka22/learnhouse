@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from uuid import uuid4
 from fastapi import HTTPException
@@ -578,7 +578,13 @@ async def install_create_organization_user(
     # Complete the user object
     user.user_uuid = f"user_{uuid4()}"
     user.password = security_hash_password(user_object.password)
-    user.email_verified = False
+    # The installer mints this account from LEARNHOUSE_INITIAL_ADMIN_* on the
+    # operator's own command, before any mailer may exist and before anyone has
+    # a login. It is not a self-registration, so the login gate must not hold it:
+    # leaving it unverified locked every deployment that enables
+    # LEARNHOUSE_EMAIL_VERIFICATION out of its own admin panel on first boot.
+    user.email_verified = True
+    user.email_verified_at = datetime.now(timezone.utc).isoformat()
     user.is_superadmin = is_superadmin
     user.creation_date = str(datetime.now())
     user.update_date = str(datetime.now())
