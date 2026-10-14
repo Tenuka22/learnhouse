@@ -22,6 +22,12 @@ export interface AIImagePickerProps {
   onSelectFile?: (_file: File) => void | Promise<void>
   onClose: () => void
   isOpen?: boolean
+  // Explicit org scope, for surfaces that render OUTSIDE an <OrgProvider>
+  // (the /editor/* routes). Falls back to OrgContext when omitted. Generation
+  // is org-scoped server-side (org credits + org storage), so a surface with
+  // neither source cannot generate.
+  orgId?: number
+  orgUUID?: string
 }
 
 interface GeneratedItem {
@@ -39,10 +45,14 @@ const PROMPT_IDEAS = [
   'A watercolor landscape for a history lesson',
 ]
 
-const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, onClose, isOpen = true }) => {
-  const org = useOrg() as any
+const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, onClose, isOpen = true, orgId: orgIdProp, orgUUID: orgUUIDProp }) => {
+  const contextOrg = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+
+  // Prefer the explicit prop (editor routes); fall back to OrgContext.
+  const orgId = orgIdProp ?? contextOrg?.id
+  const orgUUID = orgUUIDProp ?? contextOrg?.org_uuid
 
   const [tab, setTab] = useState<'generate' | 'history'>('generate')
   const [prompt, setPrompt] = useState('')
@@ -64,25 +74,31 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
   const [historyLoading, setHistoryLoading] = useState(false)
 
   const loadHistory = useCallback(async () => {
-    if (!org?.id || !access_token) return
+    if (!orgId || !access_token) return
     setHistoryLoading(true)
-    const res = await fetchAIImageHistory(org.id, access_token)
+    const res = await fetchAIImageHistory(orgId, access_token)
     if (res.success && Array.isArray(res.data)) setHistory(res.data)
     setHistoryLoading(false)
-  }, [org?.id, access_token])
+  }, [orgId, access_token])
 
   useEffect(() => {
     if (tab === 'history') loadHistory()
   }, [tab, loadHistory])
 
   const handleGenerate = async () => {
-    if (!prompt.trim() || generating || !org?.id) return
+    if (!prompt.trim() || generating) return
+    // Never fail silently: without an org there is no endpoint to call, and a
+    // silent return looks exactly like a broken button.
+    if (!orgId) {
+      setError('AI image generation needs an organization. Open this page from inside an organization to generate images.')
+      return
+    }
     setGenerating(true)
     setError(null)
     try {
       const res = await generateAIImage(
         {
-          org_id: org.id,
+          org_id: orgId,
           prompt: prompt.trim(),
           session_uuid: sessionUuid,
           // Refine by file_id: the backend reads the source image from storage
@@ -98,7 +114,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
         setError(message)
         return
       }
-      const url = aiImageUrl(org.org_uuid, res.data.file_id)
+      const url = aiImageUrl(orgUUID, res.data.file_id)
       setItems((prev) => [
         { ai_generation_uuid: res.data.ai_generation_uuid, file_id: res.data.file_id, url, prompt: prompt.trim() },
         ...prev,
@@ -125,7 +141,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
     try {
       setUsingKey(key)
       setError(null)
-      const file = await fetchAIImageFile(org.id, fileId, access_token)
+      const file = await fetchAIImageFile(orgId, fileId, access_token)
       await onSelectFile(file)
       onClose()
     } catch {
@@ -316,7 +332,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
           ) : (
             <div className="grid grid-cols-3 gap-4">
               {history.map((h) => {
-                const url = aiImageUrl(org.org_uuid, h.file_id)
+                const url = aiImageUrl(orgUUID, h.file_id)
                 return (
                   <div key={h.ai_generation_uuid} className="group flex flex-col gap-1.5">
                     <div className="relative w-full pb-[75%] rounded-2xl overflow-hidden nice-shadow bg-neutral-100">

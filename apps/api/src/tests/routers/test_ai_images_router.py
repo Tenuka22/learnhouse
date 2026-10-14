@@ -12,6 +12,7 @@ import pytest
 from fastapi import HTTPException
 
 from src.routers.ai import images as img
+from src.services.ai.image.generator import ImageRateLimitedError
 from src.services.ai.llm import AINotConfiguredError
 from src.services.ai.schemas.image import GenerateImageRequest
 
@@ -192,6 +193,25 @@ async def test_generation_failure_refunds_and_502():
             await img.api_generate_image(body, _user(), _db_returning(_org()))
     assert exc.value.status_code == 502
     refund.assert_called_once()
+
+
+async def test_rate_limited_refunds_and_429():
+    """Upstream quota/rate limit must be a 429, not the blanket 502, so the
+    client knows retrying later is the right response."""
+    body = GenerateImageRequest(org_id=5, prompt="x")
+    with patch.object(img, "is_org_member", new=AsyncMock(return_value=True)), \
+         patch.object(img, "enforce_ai_rate_limit"), \
+         patch.object(img, "reserve_ai_credit", new=AsyncMock()), \
+         patch.object(
+             img,
+             "generate_image",
+             new=AsyncMock(side_effect=ImageRateLimitedError("rate limited")),
+         ), \
+         patch.object(img, "refund_ai_credit") as refund:
+        with pytest.raises(HTTPException) as exc:
+            await img.api_generate_image(body, _user(), _db_returning(_org()))
+    assert exc.value.status_code == 429
+    refund.assert_called_once_with(5, img.IMAGE_CREDIT_COST)
 
 
 async def test_upload_failure_refunds_and_500():
