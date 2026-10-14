@@ -1,5 +1,6 @@
 import re
 import json
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple, Any, Dict
 from urllib.parse import parse_qs, urlparse
@@ -10,6 +11,12 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.communities.communities import Community, DEFAULT_MODERATION_SETTINGS
 from src.db.communities.discussions import Discussion
 from src.db.users import User
+from src.services.communities.text_filter import (
+    find_forbidden_terms,
+    mask_forbidden_terms,
+)
+
+logger = logging.getLogger(__name__)
 
 
 URL_PATTERN = re.compile(
@@ -356,31 +363,24 @@ def check_content_moderation(
     moderation_words: List[str],
 ) -> Tuple[bool, Optional[str]]:
     """
-    Check if content contains any moderation words.
+    Check if content contains any moderation word.
+
+    Matching is delegated to :mod:`src.services.communities.text_filter`, which
+    normalises both sides and matches per writing system. The previous bare
+    substring search blocked *assignment*, *class* and *assess* whenever the
+    term *ass* was configured, while letting ``b@ss`` and ``f.u.c.k`` through.
 
     Returns:
         Tuple of (is_clean, matched_word)
         - is_clean: True if content passes moderation, False if blocked
-        - matched_word: The word that was matched (if blocked), None otherwise
+        - matched_word: The configured word that matched (if blocked), None otherwise
     """
     if not moderation_words or not content:
         return True, None
 
-    # Normalize content for checking (lowercase)
-    content_lower = content.lower()
-
-    for word in moderation_words:
-        if not word:
-            continue
-
-        word_lower = word.lower().strip()
-
-        # Check for word boundary matches to avoid false positives
-        # This will match the word as a standalone word or part of a larger word
-        pattern = re.compile(re.escape(word_lower), re.IGNORECASE)
-        if pattern.search(content_lower):
-            return False, word
-
+    matches = find_forbidden_terms(content, moderation_words)
+    if matches:
+        return False, matches[0].term
     return True, None
 
 
@@ -393,16 +393,24 @@ async def validate_content_for_community(
     max_length: int = 0,
     min_length: int = 0,
     block_links: bool = False,
-) -> None:
+) -> str:
     """
     Validate content against community moderation rules.
-    Raises HTTPException if content is blocked.
+
+    Returns the content to persist: unchanged, or with forbidden terms masked
+    when the community's ``bad_word_action`` is ``"mask"``. Raises
+    HTTPException when the content is blocked.
+
+    Masking is deliberately limited to plain text. A tiptap document is a JSON
+    tree, so a match offset in its extracted text does not identify a rewritable
+    span in the document; masking it would corrupt the JSON or silently no-op.
+    Rich documents therefore always take the reject path under mask mode.
     """
     statement = select(Community).where(Community.id == community_id)
     community = (await db_session.execute(statement)).scalars().first()
 
     if not community:
-        return
+        return content
 
     text_content = parse_content_for_moderation(content)
 
@@ -434,16 +442,45 @@ async def validate_content_for_community(
         )
 
     moderation_words = community.moderation_words or []
-    if moderation_words:
-        is_clean, _matched_word = check_content_moderation(text_content, moderation_words)
-        if not is_clean:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "message": f"Your {content_type} contains content that is not allowed in this community.",
-                    "code": "MODERATION_BLOCKED",
-                },
-            )
+    if not moderation_words:
+        return content
+
+    matches = find_forbidden_terms(text_content, moderation_words)
+    if not matches:
+        return content
+
+    settings = get_community_settings(community)
+    mask_instead_of_reject = (
+        str(settings.get("bad_word_action", "reject") or "reject") == "mask"
+        and not _is_rich_document(content)
+    )
+
+    if mask_instead_of_reject:
+        masked = mask_forbidden_terms(text_content, matches)
+        logger.info(
+            "Masked %d moderation term(s) in %s for community %s",
+            len(matches), content_type, community_id,
+        )
+        return masked
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail={
+            "message": f"Your {content_type} contains content that is not allowed in this community.",
+            "code": "MODERATION_BLOCKED",
+        },
+    )
+
+
+def _is_rich_document(content: str) -> bool:
+    """True when ``content`` is a tiptap JSON document rather than plain text."""
+    if not content:
+        return False
+    try:
+        parsed = json.loads(content)
+    except (json.JSONDecodeError, TypeError):
+        return False
+    return isinstance(parsed, dict) and parsed.get("type") == "doc"
 
 
 async def validate_discussion_content(
@@ -451,9 +488,12 @@ async def validate_discussion_content(
     content: str,
     community_id: int,
     db_session: AsyncSession,
-) -> None:
+) -> Tuple[str, str]:
     """
     Validate both title and content of a discussion.
+
+    Returns the ``(title, content)`` pair to persist, with forbidden terms
+    masked when the community is in mask mode.
     """
     statement = select(Community).where(Community.id == community_id)
     community = (await db_session.execute(statement)).scalars().first()
@@ -462,35 +502,41 @@ async def validate_discussion_content(
     min_post = int(settings.get("min_post_length", 0) or 0)
     max_post = int(settings.get("max_post_length", 0) or 0)
 
-    await validate_content_for_community(
+    safe_title = await validate_content_for_community(
         title, community_id, db_session, content_type="discussion title",
         block_links=block_links,
     )
 
+    safe_content = content
     if content:
         validate_rich_content(content, settings, content_type="discussion")
-        await validate_content_for_community(
+        safe_content = await validate_content_for_community(
             content, community_id, db_session, content_type="discussion",
             min_length=min_post,
             max_length=max_post,
             block_links=block_links,
         )
 
+    return safe_title, safe_content
+
 
 async def validate_comment_content(
     content: str,
     community_id: int,
     db_session: AsyncSession,
-) -> None:
+) -> str:
     """
     Validate comment/reply content.
+
+    Returns the content to persist, with forbidden terms masked when the
+    community is in mask mode.
     """
     statement = select(Community).where(Community.id == community_id)
     community = (await db_session.execute(statement)).scalars().first()
     settings = get_community_settings(community)
 
     validate_rich_content(content, settings, content_type="reply")
-    await validate_content_for_community(
+    return await validate_content_for_community(
         content, community_id, db_session, content_type="reply",
         max_length=int(settings.get("max_comment_length", 0) or 0),
         block_links=bool(settings.get("block_links", False)),

@@ -15,6 +15,10 @@ DEFAULT_MODERATION_SETTINGS: Dict[str, Any] = {
     "disable_reactions": False,
     "auto_lock_days": 0,
     "allow_rich_content": False,
+    # What to do when moderation_words hit: "reject" blocks the post with a 400,
+    # "mask" redacts the matched terms and stores the post. Masking keeps a
+    # student thread usable where a hard block would just move it elsewhere.
+    "bad_word_action": "reject",
 }
 
 

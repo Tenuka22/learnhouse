@@ -151,8 +151,9 @@ async def create_discussion(
     # Apply per-user posting limits (slow mode, daily caps, account age, email)
     await enforce_posting_limits(author_id, community, db_session)
 
-    # Check content moderation
-    await validate_discussion_content(title, content, community.id, db_session)
+    # Check content moderation. Returns the values to persist: unchanged, or with
+    # forbidden terms masked when the community is in mask mode.
+    title, content = await validate_discussion_content(title, content, community.id, db_session)
 
     # Validate label
     validated_label = validate_label(label)
@@ -463,16 +464,19 @@ async def update_discussion(
             }
         )
 
-    # Check content moderation for updated fields
+    # Check content moderation for updated fields. Returns the sanitized values;
+    # only fields the caller actually supplied are written back below.
     title_to_check = discussion_object.title if discussion_object.title is not None else discussion.title
     content_to_check = discussion_object.content if discussion_object.content is not None else discussion.content
-    await validate_discussion_content(title_to_check, content_to_check or "", discussion.community_id, db_session)
+    safe_title, safe_content = await validate_discussion_content(
+        title_to_check, content_to_check or "", discussion.community_id, db_session
+    )
 
     # Update fields
     if discussion_object.title is not None:
-        discussion.title = discussion_object.title
+        discussion.title = safe_title
     if discussion_object.content is not None:
-        discussion.content = discussion_object.content
+        discussion.content = safe_content
     if discussion_object.label is not None:
         discussion.label = validate_label(discussion_object.label)
     if discussion_object.emoji is not None:

@@ -119,7 +119,7 @@ class TestCommunityCommentsAndVotes:
             new_callable=AsyncMock,
         ), patch(
             "src.services.communities.comments.validate_comment_content",
-            new_callable=AsyncMock,
+            new=AsyncMock(side_effect=lambda content, *_a, **_k: content),
         ), patch(
             "src.services.communities.comments.dispatch_webhooks",
             new_callable=AsyncMock,
@@ -201,7 +201,7 @@ class TestCommunityCommentsAndVotes:
             new_callable=AsyncMock,
         ), patch(
             "src.services.communities.comments.validate_comment_content",
-            new_callable=AsyncMock,
+            new=AsyncMock(side_effect=lambda content, *_a, **_k: content),
         ), patch(
             "src.services.communities.comments.get_user_votes_for_comments",
             new_callable=AsyncMock,

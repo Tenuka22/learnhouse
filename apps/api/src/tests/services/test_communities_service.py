@@ -579,7 +579,7 @@ class TestDiscussionsService:
             new_callable=AsyncMock,
         ), patch(
             "src.services.communities.discussions.validate_discussion_content",
-            new_callable=AsyncMock,
+            new=AsyncMock(side_effect=lambda title, content, *_a, **_k: (title, content)),
         ), patch(
             "src.services.communities.discussions.track",
             new_callable=AsyncMock,
@@ -834,7 +834,7 @@ class TestDiscussionsService:
             new_callable=AsyncMock,
         ), patch(
             "src.services.communities.discussions.validate_discussion_content",
-            new_callable=AsyncMock,
+            new=AsyncMock(side_effect=lambda title, content, *_a, **_k: (title, content)),
         ):
             with pytest.raises(HTTPException) as create_exc:
                 await create_discussion(

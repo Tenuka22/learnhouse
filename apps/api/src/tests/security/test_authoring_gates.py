@@ -141,7 +141,7 @@ class TestCommentsGoThroughTheRichContentValidator:
         fake_db.execute = AsyncMock(return_value=MagicMock())
         with patch.object(moderation, "get_community_settings", return_value={}), \
              patch.object(moderation, "validate_rich_content") as rich, \
-             patch.object(moderation, "validate_content_for_community", new=AsyncMock()):
-            await moderation.validate_comment_content('{"type":"doc"}', 1, fake_db)
+             patch.object(moderation, "validate_content_for_community", new=AsyncMock(return_value="masked")):
+            assert await moderation.validate_comment_content('{"type":"doc"}', 1, fake_db) == "masked"
         rich.assert_called_once()
         assert rich.call_args.kwargs.get("content_type") == "reply"
