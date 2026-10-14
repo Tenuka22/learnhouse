@@ -590,7 +590,7 @@ class TestBadWordAction:
         out = await validate_content_for_community(
             "you are an idiot", community.id, db, content_type="reply"
         )
-        assert out == "you are an ****"
+        assert out == "you are an *****"
 
     @pytest.mark.asyncio
     async def test_mask_leaves_clean_content_untouched(self, db, org):

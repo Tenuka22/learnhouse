@@ -5,10 +5,13 @@ substring search, which (a) rejected ordinary coursework and (b) accepted
 obfuscated spellings. Both directions matter, so both are asserted.
 """
 
+import importlib.util
+
 from src.services.communities.text_filter import (
     find_forbidden_terms,
     mask_forbidden_terms,
     normalize,
+    normalize_collapsed,
 )
 
 
@@ -34,11 +37,21 @@ class TestNormalize:
         assert normalize("f.u.c.k") == "fuck"
         assert normalize("f*u*c*k") == "fuck"
 
-    def test_repeated_letters_collapse(self):
-        assert normalize("fuuuuck") == "fuck"
-
     def test_whitespace_is_preserved_as_a_separator(self):
         assert normalize("hello   world") == "hello world"
+
+    def test_doubled_letters_survive_the_plain_fold(self):
+        """Regression: collapsing runs in the canonical fold turned *hello*
+        into *helo* and *class* into *clas*, so a correctly spelled term
+        stopped matching its own word."""
+        assert normalize("hello") == "hello"
+        assert normalize("class") == "class"
+        assert normalize("letter") == "letter"
+        assert normalize("assess") == "assess"
+
+    def test_repeated_letters_collapse_in_the_second_pass(self):
+        assert normalize_collapsed("fuuuuck") == "fuck"
+        assert normalize_collapsed("hello") == "helo"
 
     def test_empty(self):
         assert normalize("") == ""
@@ -86,21 +99,30 @@ class TestTruePositives:
 
 
 class TestMultilingual:
+    # U+0D9A and U+0DCA (virama) are assigned Sinhala; U+0DC7/U+0DC8/U+0DCD
+    # are unassigned in the Unicode tables and are deliberately not used here.
+    SINHALA_NEEDLE = "\u0d9a\u0dca\u0d9a"
+    SINHALA_TEXT = "\u0d9a\u0dca\u0d9a\u0dca\u0dbb\u0dd0\u0daf\u0dca\u0dad"
+
     def test_sinhala_is_matched_by_substring(self):
         # Sinhala has no word separators, so a token match would find nothing.
-        text = "\u0dc7\u0dca\u0dc8\u0dcd\u0dc8\u0dca\u0dad \u0dca\u0dbb\u0dd0\u0daf\u0dca\u0dad\u0da2"
-        assert find_forbidden_terms(text, ["\u0dc7\u0dca\u0dc8\u0dcd\u0dc8"]) != []
+        assert find_forbidden_terms(self.SINHALA_TEXT, [self.SINHALA_NEEDLE]) != []
+
+    def test_sinhala_is_not_destroyed_by_accent_stripping(self):
+        """Regression: the Latin 'drop combining marks' rule also ate the
+        Sinhala virama (a combining mark), which erased the whole word."""
+        assert normalize(self.SINHALA_TEXT) != ""
 
     def test_tamil_is_matched_by_substring(self):
         text = "\u0baa\u0bc1\u0bb3\u0bbf\u0b95\u0bb3\u0b95\u0bbe\u0b9a \u0b95\u0bb3\u0bbf\u0bb2\u0bbe"
         assert find_forbidden_terms(text, ["\u0baa\u0bc1\u0bb3\u0bbf"]) != []
 
     def test_sinhala_term_does_not_fire_on_latin_text(self):
-        assert find_forbidden_terms("hello world", ["\u0dc7\u0dca\u0dc8\u0dcd\u0dc8"]) == []
+        assert find_forbidden_terms("hello world", [self.SINHALA_NEEDLE]) == []
 
     def test_latin_terms_still_apply_in_a_multilingual_post(self):
         matches = find_forbidden_terms(
-            "\u0dc7\u0dca\u0dc8\u0dcd\u0dc8 \u0dca\u0d9a\u0dd2\u0dbb\u0dc1 this is banned",
+            self.SINHALA_TEXT + " this is banned",
             ["banned"],
         )
         assert len(matches) == 1
@@ -110,7 +132,7 @@ class TestMasking:
     def test_mask_replaces_only_the_match(self):
         text = "you are such an idiot"
         matches = find_forbidden_terms(text, ["idiot"])
-        assert mask_forbidden_terms(text, matches) == "you are such an ****"
+        assert mask_forbidden_terms(text, matches) == "you are such an *****"
 
     def test_mask_preserves_surrounding_text_and_spacing(self):
         text = "go away, idiot, now"
