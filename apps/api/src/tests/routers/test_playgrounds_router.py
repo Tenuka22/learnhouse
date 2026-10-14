@@ -12,7 +12,7 @@ from src.core.events.database import get_db_session
 from src.db.courses.courses import Course
 from src.db.playground_reactions import PlaygroundReactionSummary, ReactionUser
 from src.db.playgrounds import Playground, PlaygroundRead
-from src.db.users import APITokenUser
+from src.db.users import APITokenUser, AnonymousUser
 from src.routers.playgrounds.playgrounds import router as playgrounds_router
 from src.routers.playgrounds.playgrounds_generator import router as playgrounds_generator_router
 from src.routers.playgrounds.playgrounds_generator import (
@@ -21,6 +21,7 @@ from src.routers.playgrounds.playgrounds_generator import (
     get_org_ai_model as get_playground_org_ai_model,
 )
 from src.security.auth import get_current_user
+from src.security.api_token_utils import get_authenticated_non_api_token_user
 from src.security.features_utils.dependencies import require_playgrounds_feature
 
 
@@ -40,9 +41,32 @@ def app(db, admin_user):
     app.include_router(playgrounds_generator_router, prefix="/api/v1/playgrounds")
     app.dependency_overrides[get_db_session] = lambda: db
     app.dependency_overrides[get_current_user] = lambda: admin_user
+    # The mutating routes carry this as a route-level dependency so the read
+    # routes can stay anonymous-admitting. The test app stands in for a logged
+    # in caller, so it must be overridden here too.
+    app.dependency_overrides[get_authenticated_non_api_token_user] = lambda: admin_user
     app.dependency_overrides[require_playgrounds_feature] = lambda: True
     yield app
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def anon_app(db):
+    """Public-readiness harness: an anonymous caller on the bare router, i.e.
+    exactly what the root router now permits for read endpoints."""
+    app = FastAPI()
+    app.include_router(playgrounds_router, prefix="/api/v1/playgrounds")
+    app.dependency_overrides[get_db_session] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: AnonymousUser()
+    app.dependency_overrides[require_playgrounds_feature] = lambda: True
+    yield app
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def anon_client(anon_app):
+    async with AsyncClient(transport=ASGITransport(app=anon_app), base_url="http://test") as c:
+        yield c
 
 
 @pytest.fixture
@@ -806,3 +830,112 @@ class TestPlaygroundsRouter:
             )
 
         assert response.status_code == 404
+
+
+class TestPlaygroundAnonymousAccess:
+    """Public playgrounds must be readable by logged-out visitors.
+
+    Regression: the playgrounds router was mounted behind a blanket
+    `require_authenticated_user`, which 401'd every anonymous read before the
+    service layer's own `_check_read_access` could grant PUBLIC access. The web
+    page then turned that 401 into `notFound()`, so every public playground
+    rendered the "404 page deleted" screen.
+    """
+
+    @pytest.mark.asyncio
+    async def test_anonymous_can_read_public_published_playground(
+        self, anon_client, db, org, admin_user
+    ):
+        pg = Playground(
+            org_id=org.id,
+            name="Public PG",
+            access_type="public",
+            published=True,
+            playground_uuid="playground_public",
+            created_by=admin_user.id,
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(pg)
+        await db.commit()
+
+        response = await anon_client.get("/api/v1/playgrounds/playground_public")
+        assert response.status_code == 200, response.text
+        assert response.json()["playground_uuid"] == "playground_public"
+
+    @pytest.mark.asyncio
+    async def test_anonymous_cannot_read_authenticated_playground(
+        self, anon_client, db, org, admin_user
+    ):
+        pg = Playground(
+            org_id=org.id,
+            name="Members PG",
+            access_type="authenticated",
+            published=True,
+            playground_uuid="playground_members",
+            created_by=admin_user.id,
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(pg)
+        await db.commit()
+
+        response = await anon_client.get("/api/v1/playgrounds/playground_members")
+        assert response.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_anonymous_draft_playground_is_hidden(self, anon_client, db, org, admin_user):
+        """An unpublished public playground must still 404 for anonymous users."""
+        pg = Playground(
+            org_id=org.id,
+            name="Draft PG",
+            access_type="public",
+            published=False,
+            playground_uuid="playground_draft",
+            created_by=admin_user.id,
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(pg)
+        await db.commit()
+
+        response = await anon_client.get("/api/v1/playgrounds/playground_draft")
+        assert response.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_anonymous_write_is_still_rejected(self, anon_client, db, org):
+        """Dropping the blanket gate must not open the mutating routes."""
+        response = await anon_client.post(
+            "/api/v1/playgrounds/",
+            params={"org_id": str(org.id)},
+            json={"name": "Nope"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_anonymous_list_only_returns_public_published(
+        self, anon_client, db, org, admin_user
+    ):
+        for uuid, access, published in [
+            ("playground_pub_ok", "public", True),
+            ("playground_pub_draft", "public", False),
+            ("playground_members_ok", "authenticated", True),
+        ]:
+            db.add(
+                Playground(
+                    org_id=org.id,
+                    name=uuid,
+                    access_type=access,
+                    published=published,
+                    playground_uuid=uuid,
+                    created_by=admin_user.id,
+                    creation_date="2024-01-01",
+                    update_date="2024-01-01",
+                )
+            )
+        await db.commit()
+
+        response = await anon_client.get(f"/api/v1/playgrounds/org/{org.id}")
+        assert response.status_code == 200, response.text
+        uuids = {p["playground_uuid"] for p in response.json()}
+        assert uuids == {"playground_pub_ok"}

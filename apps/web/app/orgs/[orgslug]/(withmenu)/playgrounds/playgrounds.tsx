@@ -44,6 +44,14 @@ export default function PlaygroundsClient({
   const [newName, setNewName] = useState('')
   const { t } = useTranslation()
 
+  // Mirrors the API's own rule for editing a playground: org admin/maintainer,
+  // or the playground's creator. Hardcoding this to `true` gave every visitor,
+  // including logged-out ones, an edit pencil pointing at a route that 403s.
+  const canEditPlayground = (pg: Playground) => {
+    if (!access_token) return false
+    return isUserAdmin || (!!session?.data?.user?.id && pg.created_by === session.data.user.id)
+  }
+
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return playgrounds
     return playgrounds.filter((p) =>
@@ -153,7 +161,7 @@ export default function PlaygroundsClient({
                   key={pg.playground_uuid}
                   playground={pg}
                   orgslug={orgslug}
-                  canEdit={true}
+                  canEdit={canEditPlayground(pg)}
                 />
               ))}
 
