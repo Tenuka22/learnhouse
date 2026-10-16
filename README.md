@@ -70,6 +70,12 @@ This spins up PostgreSQL and Redis, installs dependencies, and starts the API, W
 
 > See the full [CLI documentation](apps/cli/README.md) for all commands and options.
 
+### Manual Docker Compose
+
+Prefer to manage the stack yourself instead of the CLI wizard (custom
+reverse proxy, existing infra, CI/CD)? See [`deploy/`](deploy/README.md)
+for ready-made `docker-compose.yml` stacks.
+
 ## 🛠️ Tech Stack
 
 <p align="center">

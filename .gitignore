@@ -72,3 +72,9 @@ apps/web/ee
 # Playwright MCP session artifacts
 .playwright-mcp/
 .demo-secrets
+
+# Deploy stack secrets (keep *.example tracked)
+deploy/.env
+deploy/.env.*
+!deploy/*.example
+!deploy/env.example
