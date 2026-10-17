@@ -9,9 +9,8 @@ name: Build Community Images
 on:
   push:
     branches:
-      - prod
-      - dev
       - main
+      - dev
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -21,9 +20,8 @@ on:
       - 'LICENSE'
   pull_request:
     branches:
-      - prod
-      - dev
       - main
+      - dev
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -31,10 +29,12 @@ on:
       - 'apps/e2e/**'
       - '.github/ISSUE_TEMPLATE/**'
       - 'LICENSE'
+  # Re-publishing by hand, e.g. to move :latest onto an already-built commit
+  # after a release-marker-only change was pushed.
+  workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write
 
 # See api-lint.yaml: one live run per PR, dev runs always finish.
 concurrency:
@@ -42,67 +42,63 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: learnhouse/app
+  # Published to this fork's Docker Hub namespace. The previous ghcr.io/learnhouse/app
+  # target cannot work here: a fork's GITHUB_TOKEN cannot write to a package owned by
+  # the upstream organisation, so that push always failed with a 403.
+  DOCKERHUB_IMAGE: tenuka22/learnhouse-lk
 
 jobs:
   build:
-    name: Build (${{ matrix.platform }})
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: linux/amd64
-            runner: ubuntu-latest
-          - platform: linux/arm64
-            runner: ubuntu-24.04-arm
+    name: Build and push (amd64)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Log in to GitHub Container Registry
+      # Skipped on pull_request: a PR has no access to repository secrets, and its
+      # build must still prove the image compiles.
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v4
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Prepare platform pair
-        id: prep
+      - name: Generate image tags
+        id: meta
         run: |
-          echo "platform_pair=$(echo '${{ matrix.platform }}' | tr '/' '-')" >> $GITHUB_OUTPUT
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          BRANCH="${{ github.ref_name }}"
 
-      - name: Build and push by digest
-        id: build
+          TAGS="${{ env.DOCKERHUB_IMAGE }}:${BRANCH}-${SHA_SHORT}"
+          TAGS="${TAGS},${{ env.DOCKERHUB_IMAGE }}:${BRANCH}"
+
+          # Only a main build may move :latest. The self-hosting compose stacks in
+          # deploy/ track that tag, so a dev build landing on it would push an
+          # unreviewed commit onto running installs.
+          if [ "$BRANCH" = "main" ]; then
+            TAGS="${TAGS},${{ env.DOCKERHUB_IMAGE }}:latest"
+          fi
+
+          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
+
+      # linux/amd64 only, matching the tag the compose stacks already pull. Adding
+      # arm64 means a real multi-platform manifest list (build both, join by digest
+      # in a second job) rather than the single push this job does.
+      - name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
-          platforms: ${{ matrix.platform }}
+          platforms: linux/amd64
           build-args: |
             LEARNHOUSE_PUBLIC=true
-          cache-from: type=gha,scope=${{ steps.prep.outputs.platform_pair }}
-          cache-to: type=gha,mode=max,scope=${{ steps.prep.outputs.platform_pair }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=${{ github.event_name == 'push' }}
-
-      - name: Export digest
-        if: github.event_name == 'push'
-        run: |
-          mkdir -p ${{ runner.temp }}/digests
-          digest="${{ steps.build.outputs.digest }}"
-          touch "${{ runner.temp }}/digests/${digest#sha256:}"
-
-      - name: Upload digest
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v7
-        with:
-          name: digests-${{ steps.prep.outputs.platform_pair }}
-          path: ${{ runner.temp }}/digests/*
-          if-no-files-found: error
-          retention-days: 1
+          cache-from: type=gha,scope=dockerhub-amd64
+          cache-to: type=gha,mode=max,scope=dockerhub-amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          push: ${{ github.event_name != 'pull_request' }}
 
   service-images:
     name: Service image (${{ matrix.service }})
@@ -130,41 +126,3 @@ jobs:
           push: false
           cache-from: type=gha,scope=service-${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=service-${{ matrix.service }}
-
-  merge:
-    name: Create multi-platform manifest
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    needs: build
-    steps:
-      - name: Download digests
-        uses: actions/download-artifact@v8
-        with:
-          path: ${{ runner.temp }}/digests
-          pattern: digests-*
-          merge-multiple: true
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate image tags
-        id: meta
-        run: |
-          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
-          BRANCH="${{ github.ref_name }}"
-
-          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH}-${SHA_SHORT}"
-          TAGS="${TAGS},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH}"
-
-          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-
-      - name: Create manifest list and push
-        working-directory: ${{ runner.temp }}/digests
-        run: |
-          TAGS=$(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | xargs -I{} echo "-t {}" | tr '\n' ' ')
-          docker buildx imagetools create $TAGS \
-            $(printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
