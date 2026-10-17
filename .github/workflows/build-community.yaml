@@ -59,7 +59,7 @@ jobs:
 
       # Credentials come from repo settings, never from this file:
       #   vars.DOCKERHUB_USERNAME -> Settings > Secrets and variables > Actions > Variables
-      #   secrets.TENUKA22        -> Settings > Secrets and variables > Actions > Secrets
+      #   secrets.DOCKERHUB_TOKEN -> Settings > Secrets and variables > Actions > Secrets
       # DOCKERHUB_IMAGE above must keep matching DOCKERHUB_USERNAME, or the push
       # targets someone else's namespace.
       # Skipped on pull_request: a PR gets neither, and its build must still prove
@@ -69,7 +69,7 @@ jobs:
         uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.TENUKA22 }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Generate image tags
         id: meta
