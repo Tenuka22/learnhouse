@@ -222,6 +222,25 @@ def _load_yaml_config(yaml_path: str) -> dict:
     return parsed
 
 
+# get_learnhouse_config() is deliberately uncached (it re-reads the environment
+# so tests and reloads see current values) and it runs on per-request paths —
+# the CORS middleware and /instance/info both call it. A warning emitted from
+# inside it was therefore re-logged on every single request, which buried real
+# errors under thousands of identical lines. Latch each distinct warning so it
+# is reported once per process instead.
+_warned_once: set[str] = set()
+
+
+def _warn_once(key: str, message: str, *args: object) -> None:
+    """Log ``message`` the first time ``key`` is seen in this process."""
+    if key in _warned_once:
+        return
+    _warned_once.add(key)
+    import logging as _warn_log
+
+    _warn_log.getLogger(__name__).warning(message, *args)
+
+
 def get_learnhouse_config() -> LearnHouseConfig:
 
     load_dotenv()
@@ -427,8 +446,8 @@ def get_learnhouse_config() -> LearnHouseConfig:
                 "'.app.example.com'."
             )
         if not allow_broad:
-            import logging as _cfg_log
-            _cfg_log.getLogger(__name__).warning(
+            _warn_once(
+                "cookie_domain_broad_parent",
                 "LEARNHOUSE_COOKIE_DOMAIN is set to the broad parent %r. "
                 "Every subdomain will share the session cookie. If that is "
                 "intentional, set LEARNHOUSE_COOKIE_DOMAIN_ALLOW_BROAD=true to "
@@ -652,7 +671,8 @@ def get_learnhouse_config() -> LearnHouseConfig:
             # who set LEARNHOUSE_COOKIE_DOMAIN expecting cross-subdomain auth
             # will be surprised. Warn loudly.
             if env_cookie_domain:
-                _t_logger.warning(
+                _warn_once(
+                    "cookie_domain_ignored_in_single_tenancy",
                     "LEARNHOUSE_COOKIE_DOMAIN=%r is set but LEARNHOUSE_TENANCY=single "
                     "ignores it (cookies are host-only in single mode).",
                     env_cookie_domain,
