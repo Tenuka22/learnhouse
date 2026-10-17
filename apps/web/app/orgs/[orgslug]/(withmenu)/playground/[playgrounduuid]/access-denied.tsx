@@ -1,3 +1,8 @@
+'use client'
+// Rendered from a server component, but @phosphor-icons/react calls
+// createContext, which does not exist in the RSC runtime. Without this
+// directive the route fails at "collect page data" with
+// "(0, h.createContext) is not a function".
 import Link from 'next/link'
 import { Lock } from '@phosphor-icons/react'
 import { getUriWithOrg } from '@services/config/config'
