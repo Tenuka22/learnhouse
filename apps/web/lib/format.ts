@@ -30,6 +30,7 @@ const DAYJS_LOCALES: Record<string, () => Promise<unknown>> = {
   pl: () => import('dayjs/locale/pl'),
   pt: () => import('dayjs/locale/pt'),
   ru: () => import('dayjs/locale/ru'),
+  si: () => import('dayjs/locale/si'),
   sk: () => import('dayjs/locale/sk'),
   th: () => import('dayjs/locale/th'),
   tr: () => import('dayjs/locale/tr'),

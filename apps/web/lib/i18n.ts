@@ -28,6 +28,7 @@ const LOCALE_LOADERS: Record<string, () => Promise<{ default: any }>> = {
   bn: () => import('../locales/bn.json'),
   fa: () => import('../locales/fa.json'),
   sk: () => import('../locales/sk.json'),
+  si: () => import('../locales/si.json'),
 };
 
 // Only bundle English; lazy-load all other locales on demand
