@@ -1,0 +1,19 @@
+name: Trigger Probe
+
+# Temporary diagnostic: does a push event create a run at all on this fork?
+# Delete once answered.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report trigger
+        run: echo "trigger=${{ github.event_name }} ref=${{ github.ref }} sha=${{ github.sha }}"
