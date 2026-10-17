@@ -1,6 +1,7 @@
 import toast from 'react-hot-toast'
 import { getUriWithOrg } from '@services/config/config'
 import { removeFolderPrefix } from '@services/folders/folders'
+import { removeQuestionSetPrefix } from '@services/question-sets/question-set-resource'
 import { createMediaShareLink, getMediaShareFileUrl } from '@services/media/media-resource'
 
 /**
@@ -40,6 +41,47 @@ export async function shareFolderLink(
     throw new Error('clipboard unavailable')
   } catch (e: any) {
     if (e?.name === 'AbortError') return // user dismissed the share sheet
+    toast.error(errorLabel)
+  }
+}
+
+/**
+ * Build the public, shareable URL for a question set.
+ * Always points at the public /library/question-set/{id} route.
+ */
+export function getQuestionSetShareUrl(orgslug: string, questionSetUuid: string): string {
+  const path = getUriWithOrg(orgslug, `/library/question-set/${removeQuestionSetPrefix(questionSetUuid)}`)
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  if (/^https?:\/\//i.test(path)) return path
+  return `${origin}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+/**
+ * Copy the question set's public link to the clipboard (with a native share
+ * sheet fallback on supported devices). Shows a toast.
+ */
+export async function shareQuestionSetLink(
+  orgslug: string,
+  questionSetUuid: string,
+  questionSetTitle: string,
+  copiedLabel: string,
+  errorLabel: string,
+) {
+  const url = getQuestionSetShareUrl(orgslug, questionSetUuid)
+  try {
+    const nav = typeof navigator !== 'undefined' ? navigator : undefined
+    if (nav?.share && /Mobi|Android|iPhone|iPad/i.test(nav.userAgent || '')) {
+      await nav.share({ title: questionSetTitle, url })
+      return
+    }
+    if (nav?.clipboard?.writeText) {
+      await nav.clipboard.writeText(url)
+      toast.success(copiedLabel)
+      return
+    }
+    throw new Error('clipboard unavailable')
+  } catch (e: unknown) {
+    if (e && typeof e === 'object' && 'name' in e && e.name === 'AbortError') return // user dismissed the share sheet
     toast.error(errorLabel)
   }
 }

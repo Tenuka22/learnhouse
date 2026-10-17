@@ -1,6 +1,7 @@
 'use client'
 import FolderThumbnail from '@components/Objects/Thumbnails/FolderThumbnail'
 import LibraryItemCard from '@components/Dashboard/Library/LibraryItemCard'
+import QuestionSetItemCard from '@components/Dashboard/Library/QuestionSets/QuestionSetItemCard'
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { getUriWithOrg } from '@services/config/config'
@@ -202,6 +203,8 @@ export default function LibraryGrid({
                             </div>
                             {item.resource_type === 'courses' ? (
                               <CourseItem item={item} orgslug={orgslug} onRemove={() => onRemoveItem(item.resource_uuid)} />
+                            ) : item.resource_type === 'question_sets' ? (
+                              <QuestionSetItemCard item={item} orgslug={orgslug} org_id={org_id} onRemove={() => onRemoveItem(item.resource_uuid)} />
                             ) : (
                               <LibraryItemCard item={item} orgslug={orgslug} org_id={org_id} onRemove={() => onRemoveItem(item.resource_uuid)} />
                             )}
@@ -219,6 +222,14 @@ export default function LibraryGrid({
               {items.map((item: any) =>
                 item.resource_type === 'courses' ? (
                   <CourseItem key={item.resource_uuid} item={item} orgslug={orgslug} onRemove={() => onRemoveItem(item.resource_uuid)} />
+                ) : item.resource_type === 'question_sets' ? (
+                  <QuestionSetItemCard
+                    key={item.resource_uuid}
+                    item={item}
+                    orgslug={orgslug}
+                    org_id={org_id}
+                    onRemove={() => onRemoveItem(item.resource_uuid)}
+                  />
                 ) : (
                   <LibraryItemCard
                     key={item.resource_uuid}
