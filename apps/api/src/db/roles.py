@@ -86,6 +86,12 @@ class Rights(BaseModel):
         action_delete=False,
         action_delete_own=False,
     )  # Default: read-only for backward compat with existing roles
+    question_sets: Permission = Permission(
+        action_create=False,
+        action_read=True,
+        action_update=False,
+        action_delete=False,
+    )  # Default: read-only for backward compat with existing roles
 
     def __getitem__(self, item):
         return getattr(self, item)

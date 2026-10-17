@@ -26,6 +26,7 @@ from src.routers.orgs import org_plan
 from src.routers.courses import chapters, courses, assignments, certifications
 from src.routers.folders import folders as folders_router_module
 from src.routers.media import media as media_router_module
+from src.routers.question_sets import question_sets as question_sets_router_module
 from src.routers.courses import migration as migration_router_module
 from src.routers.communities import communities as communities_router_module
 from src.routers.communities import discussions as discussions_router_module
@@ -224,6 +225,9 @@ v1_router.include_router(
 )
 v1_router.include_router(
     media_router_module.router, prefix="/media", tags=["media"]
+)
+v1_router.include_router(
+    question_sets_router_module.router, prefix="/question_sets", tags=["question_sets"]
 )
 v1_router.include_router(
     communities_router_module.router,
