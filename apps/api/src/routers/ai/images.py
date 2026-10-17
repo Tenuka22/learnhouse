@@ -32,7 +32,7 @@ from src.services.ai.generations import (
     list_generations,
     record_generation,
 )
-from src.services.ai.image.generator import OUTPUT_EXT, generate_image
+from src.services.ai.image.generator import OUTPUT_EXT, ImageRateLimitedError, generate_image
 from src.services.ai.llm import AINotConfiguredError
 from src.services.ai.schemas.image import (
     AIImageHistoryItem,
@@ -96,6 +96,8 @@ async def _load_org_and_authorize(
         401: {"description": "Authentication required"},
         403: {"description": "Not an org member, AI disabled, or insufficient credits"},
         404: {"description": "Organization not found"},
+        429: {"description": "Upstream AI provider rate limit reached"},
+        502: {"description": "Image generation failed"},
     },
 )
 async def api_generate_image(
@@ -147,6 +149,12 @@ async def api_generate_image(
     except AINotConfiguredError as e:
         refund_ai_credit(org.id, IMAGE_CREDIT_COST)
         raise HTTPException(status_code=403, detail=str(e))
+    except ImageRateLimitedError as e:
+        refund_ai_credit(org.id, IMAGE_CREDIT_COST)
+        # Distinct from the blanket 502: this is an upstream quota/rate limit,
+        # so retrying later is the correct client response.
+        logger.warning("Image generation rate limited by the upstream provider")
+        raise HTTPException(status_code=429, detail=str(e))
     except Exception:
         refund_ai_credit(org.id, IMAGE_CREDIT_COST)
         # Do not log the traceback: the chained SDK error can embed the API key.

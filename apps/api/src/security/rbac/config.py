@@ -57,6 +57,15 @@ RESOURCE_CONFIGS: dict[str, ResourceConfig] = {
         model_name="Media",
         uuid_field="media_uuid",
     ),
+    "question_sets": ResourceConfig(
+        resource_type="question_sets",
+        uuid_prefix="question_set_",
+        has_published_field=False,  # Question sets use only the public flag
+        supports_usergroups=True,
+        supports_authorship=True,
+        model_name="QuestionSet",
+        uuid_field="question_set_uuid",
+    ),
 
     "boards": ResourceConfig(
         resource_type="boards",

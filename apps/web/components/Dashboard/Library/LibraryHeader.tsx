@@ -4,6 +4,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import CreateFolderModal from '@components/Dashboard/Library/CreateFolderModal'
 import UploadMediaModal from '@components/Dashboard/Library/UploadMediaModal'
+import CreateQuestionSetModal from '@components/Dashboard/Library/QuestionSets/CreateQuestionSetModal'
 import AddContentModal from '@components/Dashboard/Library/AddContentModal'
 import { FilterPill, PRIMARY_BTN, SECONDARY_BTN } from '@components/Dashboard/Library/LibraryToolbar'
 import FolderSortDropdown, { type FolderSortMode } from '@components/Dashboard/Library/FolderSortDropdown'
@@ -14,6 +15,7 @@ import {
   Plus,
   UploadSimple,
   FolderSimplePlus,
+  ListChecks,
 } from '@phosphor-icons/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -49,6 +51,7 @@ export default function LibraryHeader({
   const { t } = useTranslation()
   const [newFolderOpen, setNewFolderOpen] = React.useState(false)
   const [uploadOpen, setUploadOpen] = React.useState(false)
+  const [newQuestionSetOpen, setNewQuestionSetOpen] = React.useState(false)
   const [addContentOpen, setAddContentOpen] = React.useState(false)
 
   return (
@@ -75,6 +78,15 @@ export default function LibraryHeader({
               dialogTitle={t('media.upload_media')}
               dialogContent={<UploadMediaModal orgslug={orgslug} folderUuid={folderUuid} closeModal={() => setUploadOpen(false)} onChanged={onChanged} />}
               dialogTrigger={<button className={SECONDARY_BTN}><UploadSimple size={16} /><span>{t('media.upload_media')}</span></button>}
+            />
+            <Modal
+              isDialogOpen={newQuestionSetOpen}
+              onOpenChange={setNewQuestionSetOpen}
+              minHeight="no-min"
+              minWidth="md"
+              dialogTitle={t('question_sets.create_question_set')}
+              dialogContent={<CreateQuestionSetModal orgslug={orgslug} folderUuid={folderUuid} closeModal={() => setNewQuestionSetOpen(false)} onChanged={onChanged} />}
+              dialogTrigger={<button className={SECONDARY_BTN}><ListChecks size={16} /><span>{t('question_sets.new_question_set')}</span></button>}
             />
             <Modal
               isDialogOpen={newFolderOpen}

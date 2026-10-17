@@ -3,6 +3,7 @@ import { getServerSession } from '@/lib/auth/server'
 import { getPlayground } from '@services/playgrounds/playgrounds'
 import { getOrgCourses } from '@services/courses/courses'
 import { notFound, redirect } from 'next/navigation'
+import { OrgProvider } from '@components/Contexts/OrgContext'
 import PlaygroundEditor from '@components/Playground/PlaygroundEditor'
 
 type PageParams = Promise<{ playgrounduuid: string }>
@@ -47,11 +48,17 @@ export default async function EditPlaygroundPage({ params }: { params: PageParam
   }
 
   return (
-    <PlaygroundEditor
-      playground={playground}
-      orgslug={playground.org_slug || ''}
-      accessToken={access_token}
-      orgCourses={orgCourses}
-    />
+    // This route lives outside app/orgs/[orgslug], so no layout provides org
+    // context. Without it every useOrg() consumer in the playground editor
+    // (AI image generation, media URLs) silently gets null. An empty slug is
+    // a pass-through: OrgProvider disables its query and renders children.
+    <OrgProvider orgslug={playground.org_slug || ''}>
+      <PlaygroundEditor
+        playground={playground}
+        orgslug={playground.org_slug || ''}
+        accessToken={access_token}
+        orgCourses={orgCourses}
+      />
+    </OrgProvider>
   )
 }

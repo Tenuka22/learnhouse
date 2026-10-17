@@ -90,8 +90,9 @@ async def create_comment(
 
     author_id = await require_community_participant(current_user, community, db_session)
 
-    # Check content moderation
-    await validate_comment_content(content, community.id, db_session)
+    # Check content moderation. Returns the value to persist: unchanged, or with
+    # forbidden terms masked when the community is in mask mode.
+    content = await validate_comment_content(content, community.id, db_session)
 
     # Create comment
     comment = DiscussionComment(
@@ -244,7 +245,7 @@ async def update_comment(
 
     # Check content moderation for updated content
     if comment_update.content is not None and discussion:
-        await validate_comment_content(
+        comment_update.content = await validate_comment_content(
             comment_update.content, discussion.community_id, db_session
         )
 

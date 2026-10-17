@@ -5,6 +5,7 @@ import { queryKeys } from '@/lib/query/keys'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { useAuth } from '@components/Contexts/AuthContext'
+import { OrgProvider } from '@components/Contexts/OrgContext'
 import EditorSkeleton from './EditorSkeleton'
 import EditorWrapper from './EditorWrapper'
 import MarkdownActivity from '@components/Objects/Activities/Markdown/MarkdownActivity'
@@ -42,8 +43,17 @@ export default function EditorLoader({ courseid: _courseid, activityuuid }: Edit
   const org = bootstrap?.org
   const dataReady = Boolean(bootstrap)
 
+  // This route lives outside app/orgs/[orgslug], so no layout provides org
+  // context, yet the bootstrap already resolved the org. Publish it so every
+  // useOrg() consumer in the editor (AI image generation, media URLs) works.
+  // An empty slug is a pass-through: OrgProvider disables its query and renders
+  // children.
+  const withOrg = (node: React.ReactNode) => (
+    <OrgProvider orgslug={org?.slug || ''}>{node}</OrgProvider>
+  )
+
   if (bootstrapError) {
-    return (
+    return withOrg(
       <div className="flex flex-col items-center justify-center h-64 gap-3 text-gray-500">
         <p className="text-sm">Failed to load editor. Please refresh the page.</p>
         <button
@@ -60,20 +70,20 @@ export default function EditorLoader({ courseid: _courseid, activityuuid }: Edit
   const isResourceActivity = activity?.activity_sub_type === 'SUBTYPE_DYNAMIC_RESOURCE'
 
   if (isMarkdownActivity && dataReady) {
-    return <MarkdownActivity activity={activity} editable />
+    return withOrg(<MarkdownActivity activity={activity} editable />)
   }
 
   if (isEmbedActivity && dataReady) {
-    return <EmbedActivity activity={activity} editable />
+    return withOrg(<EmbedActivity activity={activity} editable />)
   }
 
   if (isResourceActivity && dataReady) {
     // Resource activities are configured on creation; the editor shows a preview
     // of the embedded resource (change it by re-adding the activity).
-    return <ResourceActivity activity={activity} orgslug={org?.slug || ''} />
+    return withOrg(<ResourceActivity activity={activity} orgslug={org?.slug || ''} />)
   }
 
-  return (
+  return withOrg(
     <div className="relative">
       {/* Skeleton: fades out when editor is ready */}
       <div

@@ -26,6 +26,7 @@ from src.routers.orgs import org_plan
 from src.routers.courses import chapters, courses, assignments, certifications
 from src.routers.folders import folders as folders_router_module
 from src.routers.media import media as media_router_module
+from src.routers.question_sets import question_sets as question_sets_router_module
 from src.routers.courses import migration as migration_router_module
 from src.routers.communities import communities as communities_router_module
 from src.routers.communities import discussions as discussions_router_module
@@ -226,6 +227,9 @@ v1_router.include_router(
     media_router_module.router, prefix="/media", tags=["media"]
 )
 v1_router.include_router(
+    question_sets_router_module.router, prefix="/question_sets", tags=["question_sets"]
+)
+v1_router.include_router(
     communities_router_module.router,
     prefix="/communities",
     tags=["communities"],
@@ -333,7 +337,14 @@ v1_router.include_router(
     playgrounds_router_module.router,
     prefix="/playgrounds",
     tags=["playgrounds"],
-    dependencies=[Depends(require_authenticated_user), Depends(require_plan_for_playgrounds("personal", "Playgrounds"))]
+    # Anonymous-admitting on purpose: PUBLIC playgrounds are served to logged-out
+    # visitors, and `get_playground` / `list_org_playgrounds` do their own
+    # per-playground access checks (they handle AnonymousUser explicitly). The
+    # blanket require_authenticated_user here 401'd every anonymous request
+    # before those checks ran, which 404'd every public playground page.
+    # Mutating and access-managing routes re-impose auth per-route in
+    # src/routers/playgrounds/playgrounds.py.
+    dependencies=[Depends(get_non_api_token_user), Depends(require_plan_for_playgrounds("personal", "Playgrounds"))]
 )
 v1_router.include_router(
     playgrounds_generator_router.router,

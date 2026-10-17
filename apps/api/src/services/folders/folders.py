@@ -142,6 +142,7 @@ def _resource_registry():
     from src.db.boards import Board
     from src.db.playgrounds import Playground
     from src.db.media.media import Media
+    from src.db.question_sets.question_sets import QuestionSet
 
     return {
         "course_": ("courses", Course, "course_uuid"),
@@ -150,6 +151,7 @@ def _resource_registry():
         "board_": ("boards", Board, "board_uuid"),
         "playground_": ("playgrounds", Playground, "playground_uuid"),
         "media_": ("media", Media, "media_uuid"),
+        "question_set_": ("question_sets", QuestionSet, "question_set_uuid"),
     }
 
 
@@ -174,7 +176,7 @@ def _public_resource_dump(resource) -> dict:
 
 # Resource types gated by their own RBAC rules (usergroup links, folder-aware
 # media privacy); filtered per item through check_resource_access.
-_RBAC_GATED_RESOURCE_TYPES = ("boards", "communities", "media")
+_RBAC_GATED_RESOURCE_TYPES = ("boards", "communities", "media", "question_sets")
 
 
 async def _can_read(request, current_user, db_session: AsyncSession, resource_uuid: str) -> bool:

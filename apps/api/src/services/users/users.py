@@ -15,6 +15,7 @@ from src.security.features_utils.usage import (
     increase_feature_usage,
 )
 from src.core.deployment_mode import get_deployment_mode
+from src.core.email_verification import email_verification_required
 from src.services.users.usergroups import add_users_to_usergroup
 from src.services.users.emails import (
     send_account_creation_email,
@@ -206,8 +207,9 @@ async def create_user(
     user.user_uuid = f"user_{uuid4()}"
     user.password = security_hash_password(user_object.password) if user_object.password else ""
 
-    # OAuth users and OSS mode get auto-verified email
-    if is_oauth or get_deployment_mode() != 'saas':
+    # OAuth users, and any deployment that does not require verification, get an
+    # auto-verified address. See src/core/email_verification.py.
+    if is_oauth or not email_verification_required(get_deployment_mode()):
         user.email_verified = True
         user.email_verified_at = datetime.now(timezone.utc).isoformat()
         user.signup_method = signup_provider if is_oauth else "email"
@@ -332,10 +334,24 @@ async def create_user(
             org_name=org.name if org else None,
             **resolve_org_email_branding(org, org_config, request).as_kwargs(),
         )
-    elif get_deployment_mode() == 'saas':
+    elif email_verification_required(get_deployment_mode()):
         # Import here to avoid circular imports
         from src.services.users.email_verification import send_verification_email
-        await send_verification_email(request, db_session, user, org_id)
+        try:
+            await send_verification_email(request, db_session, user, org_id)
+        except HTTPException:
+            # SaaS has always failed the signup when the mail could not go out.
+            # A self-hosted install can enable verification before its mailer is
+            # configured, and the account is already committed by this point:
+            # raising would report a failed signup while leaving the address
+            # taken ("email already in use") on the retry. Keep the account and
+            # let the login gate's resend recover it once mail works.
+            if get_deployment_mode() == 'saas':
+                raise
+            logging.exception(
+                "Verification email not sent to %s; the account stays unverified "
+                "until a resend succeeds. Check mailing_config.", user.email
+            )
 
     return user_read
 
@@ -453,8 +469,9 @@ async def create_user_without_org(
     user.user_uuid = f"user_{uuid4()}"
     user.password = security_hash_password(user_object.password) if user_object.password else ""
 
-    # OAuth users and OSS mode get auto-verified email
-    if is_oauth or get_deployment_mode() != 'saas':
+    # OAuth users, and any deployment that does not require verification, get an
+    # auto-verified address. See src/core/email_verification.py.
+    if is_oauth or not email_verification_required(get_deployment_mode()):
         user.email_verified = True
         user.email_verified_at = datetime.now(timezone.utc).isoformat()
         user.signup_method = signup_provider if is_oauth else "email"
@@ -505,8 +522,9 @@ async def create_user_without_org(
     user_read = UserRead.model_validate(user)
 
     # OAuth users get welcome email (already verified)
-    # Non-OAuth SaaS users get verification email (no org needed)
-    if is_oauth or get_deployment_mode() != 'saas':
+    # Non-OAuth users get a verification email (no org needed) when the
+    # deployment requires verification.
+    if is_oauth or not email_verification_required(get_deployment_mode()):
         send_account_creation_email(
             user=user_read,
             email=user_read.email,
@@ -514,7 +532,17 @@ async def create_user_without_org(
         )
     else:
         from src.services.users.email_verification import send_verification_email
-        await send_verification_email(request, db_session, user, org_id=None)
+        try:
+            await send_verification_email(request, db_session, user, org_id=None)
+        except HTTPException:
+            # Account is already committed; see create_user() for why a failed
+            # send must not fail the signup outside SaaS.
+            if get_deployment_mode() == 'saas':
+                raise
+            logging.exception(
+                "Verification email not sent to %s; the account stays unverified "
+                "until a resend succeeds. Check mailing_config.", user.email
+            )
 
     return user_read
 

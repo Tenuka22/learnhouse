@@ -50,6 +50,13 @@ export function resourceHref(
         ? getUriWithOrg(orgslug, `/playground/${resource.playground_uuid}`)
         : null
     }
+    case 'question_sets': {
+      // Dashboard editing opens a modal (QuestionSetItemCard), not a route;
+      // only the public direct-view/share page exists.
+      if (dash) return null
+      const id = (resource.question_set_uuid || '').replace('question_set_', '')
+      return id ? getUriWithOrg(orgslug, `/library/question-set/${id}`) : null
+    }
     default:
       return null
   }

@@ -15,6 +15,10 @@ interface AIImageButtonProps {
   className?: string
   label?: string
   variant?: 'button' | 'chip'
+  // Forwarded to AIImagePicker. Required on surfaces outside an <OrgProvider>
+  // (the /editor/* routes); omitted elsewhere so the picker uses OrgContext.
+  orgId?: number
+  orgUUID?: string
 }
 
 const AIImageButton: React.FC<AIImageButtonProps> = ({
@@ -23,6 +27,8 @@ const AIImageButton: React.FC<AIImageButtonProps> = ({
   className,
   label = 'Generate with AI',
   variant = 'button',
+  orgId,
+  orgUUID,
 }) => {
   const [open, setOpen] = useState(false)
 
@@ -42,6 +48,8 @@ const AIImageButton: React.FC<AIImageButtonProps> = ({
           isOpen={open}
           onSelect={onSelect}
           onSelectFile={onSelectFile}
+          orgId={orgId}
+          orgUUID={orgUUID}
           onClose={() => setOpen(false)}
         />
       )}

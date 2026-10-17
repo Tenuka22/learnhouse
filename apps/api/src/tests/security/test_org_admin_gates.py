@@ -14,7 +14,7 @@ import pytest
 from fastapi import HTTPException
 
 from src.db.organizations import OrganizationCreate, OrganizationUpdate
-from src.db.roles import Role, RoleCreate, RoleTypeEnum
+from src.db.roles import PermissionsWithOwn, Role, RoleCreate, RoleTypeEnum
 from src.db.user_organizations import UserOrganization
 from src.db.users import PublicUser, User
 from src.tests.conftest import ADMIN_RIGHTS, USER_RIGHTS
@@ -156,6 +156,46 @@ class TestUpdateUserRole:
                 mock_request, org.id, admin_user.id, "role_user", db, admin_user
             )
         assert exc.value.status_code == 403
+
+    async def test_admin_can_promote_member_to_instructor(
+        self, db, org, admin_user, regular_user, mock_request, side_effects
+    ):
+        """The teacher path: an Admin promotes an ordinary member to Instructor.
+
+        Instructor is below Admin/Maintainer, so it is assignable, and it is the
+        role that grants own-content authoring rights.
+        """
+        from src.services.orgs.users import update_user_role
+
+        instructor = Role(
+            id=3,
+            name="Instructor",
+            org_id=None,
+            role_type=RoleTypeEnum.TYPE_GLOBAL,
+            role_uuid="role_global_instructor",
+            rights={
+                **USER_RIGHTS.model_dump(),
+                "dashboard": {"action_access": True},
+                "courses": PermissionsWithOwn(
+                    action_create=True,
+                    action_read=True,
+                    action_read_own=True,
+                    action_update=False,
+                    action_update_own=True,
+                    action_delete=False,
+                    action_delete_own=True,
+                ).model_dump(),
+            },
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db.add(instructor)
+        await db.commit()
+
+        await update_user_role(
+            mock_request, org.id, regular_user.id, "role_global_instructor", db, admin_user
+        )
+        assert await _role_of(db, org, regular_user.id) == 3
 
     async def test_cross_org_role_rejected(
         self, db, org, other_org, admin_user, regular_user, mock_request, side_effects

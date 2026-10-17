@@ -21,6 +21,7 @@ import {
   ChatsCircle,
   SquaresFour,
   Cube,
+  ListChecks,
   LinkSimple,
   FilePdf,
   VideoCamera,
@@ -32,7 +33,7 @@ import {
   type IconProps,
 } from '@phosphor-icons/react'
 
-type ResourceType = 'courses' | 'podcasts' | 'communities' | 'boards' | 'playgrounds' | 'media'
+type ResourceType = 'courses' | 'podcasts' | 'communities' | 'boards' | 'playgrounds' | 'media' | 'question_sets'
 
 const TYPE_TONE: Record<string, string> = {
   courses: 'bg-blue-50 text-blue-500',
@@ -41,6 +42,7 @@ const TYPE_TONE: Record<string, string> = {
   communities: 'bg-emerald-50 text-emerald-500',
   boards: 'bg-indigo-50 text-indigo-500',
   playgrounds: 'bg-fuchsia-50 text-fuchsia-500',
+  question_sets: 'bg-sky-50 text-sky-500',
 }
 
 function mediaIcon(resource: any): React.ComponentType<IconProps> {
@@ -62,6 +64,7 @@ function typeIcon(type: string, resource: any): React.ComponentType<IconProps> {
     case 'communities': return ChatsCircle
     case 'boards': return SquaresFour
     case 'playgrounds': return Cube
+    case 'question_sets': return ListChecks
     default: return FileIcon
   }
 }

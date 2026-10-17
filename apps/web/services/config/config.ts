@@ -152,6 +152,27 @@ const deriveAPIUrl = (): string => {
   return `${backendUrl}/api/v1/`
 }
 
+// Backend origin as reached FROM the Next.js server (same container / network).
+// Server-side only: it is deliberately NOT a NEXT_PUBLIC_ var, so it never
+// reaches the browser bundle. This is what turns a same-origin, proxied API
+// base ("/api/v1/") back into something Node's fetch can dial.
+const getInternalApiOrigin = (): string =>
+  getConfig('LEARNHOUSE_INTERNAL_API_URL', 'http://127.0.0.1:9000').replace(/\/+$/, '')
+
+/**
+ * Turn a possibly-relative API base into an absolute URL.
+ *
+ * A relative base ("/api/v1/") is the right value in the BROWSER — it keeps
+ * every API call on the Next.js origin so the app's own proxy forwards it and
+ * the session cookie stays first-party. Node's fetch has no base URL to
+ * resolve against and throws on a relative one, so server-side callers get
+ * the internal backend origin instead.
+ */
+const absolutizeAPIUrl = (url: string): string => {
+  if (/^https?:\/\//i.test(url)) return url
+  return `${getInternalApiOrigin()}${url.startsWith('/') ? '' : '/'}${url}`
+}
+
 // For direct usage, these call the getters
 export const getAPIUrl = () => {
   // On custom domains (client-side), use relative path to go through Next.js proxy
@@ -159,13 +180,15 @@ export const getAPIUrl = () => {
   if (isOnCustomDomain()) {
     return '/api/v1/'
   }
-  return deriveAPIUrl()
+  const apiUrl = deriveAPIUrl()
+  if (typeof window === 'undefined') return absolutizeAPIUrl(apiUrl)
+  return apiUrl
 }
 
 // Server-side only - always returns full URL (never relative path)
 // Use this in Server Components, API routes, and server-side data fetching
 export const getServerAPIUrl = () => {
-  return deriveAPIUrl()
+  return absolutizeAPIUrl(deriveAPIUrl())
 }
 
 export const getBackendUrl = () => getLEARNHOUSE_BACKEND_URL()

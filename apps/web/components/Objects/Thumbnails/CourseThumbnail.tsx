@@ -303,6 +303,7 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCo
       ressourceType="courses"
       checkMethod="roles"
       orgId={course.org_id}
+      courseUuid={course.course_uuid}
     >
       <div className={`absolute top-2 end-2 z-20 transition-opacity ${
         isDashboard && !isOpen ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'

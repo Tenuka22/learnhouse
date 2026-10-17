@@ -177,3 +177,56 @@ async def test_generate_image_truncates_long_prompt():
     assert out == b"IMG"
     sent_prompt = client.aio.models.generate_content.await_args.kwargs["contents"][0]
     assert len(sent_prompt) == gen.MAX_PROMPT_CHARS
+
+
+# --- rate limiting (429) ---
+
+async def test_generate_image_rate_limited_raises_rate_limited_error():
+    """A sustained 429 must surface as the distinct rate-limit error, not a
+    generic RuntimeError, so the router can answer 429 instead of a blanket 502."""
+    class RateLimited(Exception):
+        code = 429
+
+    client = MagicMock()
+    client.aio.models.generate_content = AsyncMock(side_effect=RateLimited("quota"))
+    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+        "google.genai.Client", return_value=client
+    ), patch("asyncio.sleep", new=AsyncMock()):
+        with pytest.raises(gen.ImageRateLimitedError):
+            await gen.generate_image("a cat")
+    assert client.aio.models.generate_content.await_count == gen._MAX_ATTEMPTS
+
+
+def test_rate_limited_error_is_a_runtime_error():
+    """Keeps existing generic-failure handling/callers working."""
+    assert issubclass(gen.ImageRateLimitedError, RuntimeError)
+
+
+def test_retry_delay_backs_off_harder_for_rate_limit_than_capacity():
+    """Regression: a flat backoff burned every attempt inside the same 429
+    window. A quota window needs a materially longer wait than a 5xx blip."""
+    class RateLimited(Exception):
+        code = 429
+
+    class ServerError(Exception):
+        code = 503
+
+    for attempt in (1, 2):
+        assert gen._retry_delay_seconds(RateLimited(), attempt) > gen._retry_delay_seconds(
+            ServerError(), attempt
+        )
+
+
+def test_retry_delay_honours_server_retry_info():
+    exc = Exception("x")
+    exc.retry_info = SimpleNamespace(retry_delay=7.5)
+    assert gen._retry_delay_seconds(exc, 1) == 7.5
+
+
+def test_retry_delay_is_capped():
+    class RateLimited(Exception):
+        code = 429
+
+    exc = RateLimited("x")
+    exc.retry_info = SimpleNamespace(retry_delay=9999)
+    assert gen._retry_delay_seconds(exc, 1) == gen._RETRY_MAX_DELAY_SECONDS

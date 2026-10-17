@@ -1,0 +1,102 @@
+name: aloysius
+
+# Aloysius College — single-host LearnHouse stack.
+#
+# NOTE ON ${} INTERPOLATION
+# Docker Compose resolves ${VAR} on the HOST, from the shell or a `.env` file
+# beside this compose file. It does NOT read `env_file`. So anything in
+# `env_file` (i.e. .env.production) is invisible to ${...} here.
+# This file therefore avoids ${...} entirely: all configuration reaches the
+# containers through `env_file`, and healthchecks expand variables inside the
+# container via $$.
+#
+# IMAGE
+# tenuka22/learnhouse-lk:latest on Docker Hub. To serve it from your own GitLab
+# registry instead, push the same image there and change this one line:
+#   docker tag tenuka22/learnhouse-lk:latest registry.gitlab.com/tenuka22/learnhouse-lk:latest
+#   docker push registry.gitlab.com/tenuka22/learnhouse-lk:latest
+
+services:
+  learnhouse-app:
+    # One container: Next.js (8000), FastAPI (9000), Hocuspocus collab (4000),
+    # all fronted by the image's own nginx on 80. So a single published port
+    # serves the whole app, and /api/v1 + /collab are proxied same-origin.
+    image: tenuka22/learnhouse-lk:latest
+    init: true
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      # HOSTNAME needs to be set explicitly for the container
+      - HOSTNAME=0.0.0.0
+      - TZ=Asia/Colombo
+      # Collab talks to the API, which listens on LEARNHOUSE_PORT (9000).
+      # Its built-in default is localhost:8000, which is the Next.js server.
+      - LEARNHOUSE_API_URL=http://localhost:9000
+      # Collab reads a different Redis variable than the API does.
+      - LEARNHOUSE_REDIS_URL=redis://redis:6379/1
+    ports:
+      # Left number is the host port; the app is published as http://localhost:8080.
+      - "8080:80"
+    volumes:
+      # LearnHouse resolves media against a path RELATIVE to /app/api, so the
+      # root is /app/api/content. Without this volume every uploaded course
+      # PDF, image, video and HLS transcode is lost on container recreate.
+      - aloysius-content:/app/api/content
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aloysius-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  db:
+    # MUST be a pgvector build. Plain postgres:16-alpine has no `vector`
+    # extension; LearnHouse aborts startup on `CREATE EXTENSION vector`, and
+    # that failure cascades into repeated "Database not reachable" errors.
+    image: pgvector/pgvector:pg16
+    init: true
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    volumes:
+      - aloysius-db-data:/var/lib/postgresql/data
+    networks:
+      - aloysius-network
+    healthcheck:
+      # $$ is escaped by Compose so the container's own shell expands it.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 4s
+      retries: 5
+
+  redis:
+    image: redis:7.2.3-alpine
+    init: true
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - aloysius-redis-data:/data
+    networks:
+      - aloysius-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 4s
+      retries: 5
+
+networks:
+  aloysius-network:
+    driver: bridge
+
+volumes:
+  aloysius-db-data:
+  aloysius-redis-data:
+  aloysius-content:

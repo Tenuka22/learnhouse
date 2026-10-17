@@ -552,6 +552,8 @@ function ThumbnailTab({
           </button>
           <AIImageButton
             onSelect={handleRemoteImageSelect}
+            orgId={playground.org_id}
+            orgUUID={playground.org_uuid ?? undefined}
             className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
           />
         </div>

@@ -67,6 +67,7 @@ const AdminEditOptions: React.FC<AdminEditOptionsProps> = ({ course, orgslug, de
       ressourceType="courses"
       checkMethod="roles"
       orgId={course.org_id}
+      courseUuid={course.course_uuid}
     >
       <div className="absolute top-2 end-2 z-20">
         <DropdownMenu>

@@ -35,6 +35,7 @@ def _make_community(db, org, **overrides):
         course_id=overrides.pop("course_id", None),
         community_uuid=overrides.pop("community_uuid", "community_moderation"),
         moderation_words=overrides.pop("moderation_words", []),
+        moderation_settings=overrides.pop("moderation_settings", None),
         creation_date=overrides.pop("creation_date", "2024-01-01"),
         update_date=overrides.pop("update_date", "2024-01-01"),
     )
@@ -559,3 +560,129 @@ class TestValidateContentLengthAndLinks:
 
         assert exc_info.value.status_code == 400
         assert exc_info.value.detail["code"] == "MODERATION_LINKS_BLOCKED"
+
+
+class TestBadWordAction:
+    """`bad_word_action` picks between hard rejection and redaction."""
+
+    @pytest.mark.asyncio
+    async def test_reject_is_the_default(self, db, org):
+        community = _make_community(
+            db, org, id=1, community_uuid="community_reject", moderation_words=["idiot"]
+        )
+        with pytest.raises(HTTPException) as exc:
+            await validate_content_for_community(
+                "you are an idiot", community.id, db, content_type="reply"
+            )
+        assert exc.value.status_code == 400
+        assert exc.value.detail["code"] == "MODERATION_BLOCKED"
+
+    @pytest.mark.asyncio
+    async def test_mask_returns_redacted_text_instead_of_raising(self, db, org):
+        community = _make_community(
+            db,
+            org,
+            id=2,
+            community_uuid="community_mask",
+            moderation_words=["idiot"],
+            moderation_settings={"bad_word_action": "mask"},
+        )
+        out = await validate_content_for_community(
+            "you are an idiot", community.id, db, content_type="reply"
+        )
+        assert out == "you are an *****"
+
+    @pytest.mark.asyncio
+    async def test_mask_leaves_clean_content_untouched(self, db, org):
+        community = _make_community(
+            db,
+            org,
+            id=3,
+            community_uuid="community_mask_clean",
+            moderation_words=["idiot"],
+            moderation_settings={"bad_word_action": "mask"},
+        )
+        out = await validate_content_for_community(
+            "this is a helpful lesson", community.id, db, content_type="reply"
+        )
+        assert out == "this is a helpful lesson"
+
+    @pytest.mark.asyncio
+    async def test_mask_does_not_become_a_word_boundary_bypass(self, db, org):
+        """The whole point of the rewrite: 'assignment' must survive 'ass'."""
+        community = _make_community(
+            db,
+            org,
+            id=4,
+            community_uuid="community_mask_academic",
+            moderation_words=["ass"],
+            moderation_settings={"bad_word_action": "mask"},
+        )
+        out = await validate_content_for_community(
+            "Please read the assignment before class.", community.id, db, content_type="reply"
+        )
+        assert out == "Please read the assignment before class."
+
+    @pytest.mark.asyncio
+    async def test_mask_redacts_obfuscated_spelling_in_place(self, db, org):
+        community = _make_community(
+            db,
+            org,
+            id=5,
+            community_uuid="community_mask_leet",
+            moderation_words=["idiot"],
+            moderation_settings={"bad_word_action": "mask"},
+        )
+        out = await validate_content_for_community(
+            "stop being an 1d10t", community.id, db, content_type="reply"
+        )
+        assert out == "stop being an 1d10t".replace("1d10t", "*****")
+
+    @pytest.mark.asyncio
+    async def test_mask_still_rejects_rich_documents(self, db, org):
+        """A tiptap document is a JSON tree, so an offset in its extracted text
+        cannot be rewritten safely; mask mode must fall back to rejecting."""
+        community = _make_community(
+            db,
+            org,
+            id=6,
+            community_uuid="community_mask_rich",
+            moderation_words=["idiot"],
+            moderation_settings={"bad_word_action": "mask", "allow_rich_content": True},
+        )
+        doc = json.dumps(
+            {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "an idiot"}]}]}
+        )
+        with pytest.raises(HTTPException) as exc:
+            await validate_content_for_community(doc, community.id, db, content_type="reply")
+        assert exc.value.status_code == 400
+        assert exc.value.detail["code"] == "MODERATION_BLOCKED"
+
+    @pytest.mark.asyncio
+    async def test_discussion_validator_returns_masked_title_and_body(self, db, org):
+        community = _make_community(
+            db,
+            org,
+            id=7,
+            community_uuid="community_mask_discussion",
+            moderation_words=["idiot"],
+            moderation_settings={"bad_word_action": "mask"},
+        )
+        title, content = await validate_discussion_content(
+            "what an idiot said", "an idiot wrote this", community.id, db
+        )
+        assert title == "what an ***** said"
+        assert content == "an ***** wrote this"
+
+    @pytest.mark.asyncio
+    async def test_comment_validator_returns_masked_text(self, db, org):
+        community = _make_community(
+            db,
+            org,
+            id=8,
+            community_uuid="community_mask_comment",
+            moderation_words=["idiot"],
+            moderation_settings={"bad_word_action": "mask"},
+        )
+        out = await validate_comment_content("that idiot again", community.id, db)
+        assert out == "that ***** again"

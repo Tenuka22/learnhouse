@@ -1,0 +1,91 @@
+name: learnhouse-lk
+
+# NOTE ON ${} INTERPOLATION
+# Docker Compose resolves ${VAR} on the HOST, from the shell or a `.env` file
+# beside this compose file. It does NOT read `env_file`. So anything in
+# `env_file` (i.e. .env.production) is invisible to ${...} here.
+# This file therefore avoids ${...} entirely: all configuration reaches the
+# containers through `env_file`, and healthchecks expand variables inside the
+# container via $$.
+
+services:
+  learnhouse-app:
+    # Built from the fork: https://github.com/Tenuka22/learnhouse
+    # Pin a tag or digest in production rather than tracking :latest.
+    image: tenuka22/learnhouse-lk:latest
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - HOSTNAME=0.0.0.0
+      - TZ=Asia/Colombo
+      # Collab talks to the API, which listens on LEARNHOUSE_PORT (9000).
+      # Its built-in default is localhost:8000, which is the Next.js server.
+      - LEARNHOUSE_API_URL=http://localhost:9000
+      # Collab reads a different Redis variable than the API does.
+      - LEARNHOUSE_REDIS_URL=redis://redis:6379/1
+    ports:
+      # TLS is terminated by your outer proxy (Caddy/nginx/Traefik). It must
+      # forward X-Forwarded-Proto: https or the app cannot mark cookies Secure.
+      # To serve directly on 80 instead, change the left-hand number.
+      - "8080:80"
+    volumes:
+      # LearnHouse resolves media against a path RELATIVE to /app/api, so the
+      # root is /app/api/content. Without this volume every uploaded course
+      # PDF, image, video and HLS transcode is lost on container recreate.
+      - learnhouse-content:/app/api/content
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - learnhouse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  db:
+    # MUST be a pgvector build. Plain postgres:16-alpine has no `vector`
+    # extension; LearnHouse aborts startup on `CREATE EXTENSION vector`, and
+    # that failure cascades into repeated "Database not reachable" errors.
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    volumes:
+      - learnhouse-db-data:/var/lib/postgresql/data
+    networks:
+      - learnhouse-network
+    healthcheck:
+      # $$ is escaped by Compose so the container's own shell expands it.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 4s
+      retries: 5
+
+  redis:
+    image: redis:7.2.3-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - learnhouse-redis-data:/data
+    networks:
+      - learnhouse-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 4s
+      retries: 5
+
+networks:
+  learnhouse-network:
+    driver: bridge
+
+volumes:
+  learnhouse-db-data:
+  learnhouse-redis-data:
+  learnhouse-content:

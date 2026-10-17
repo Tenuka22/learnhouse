@@ -41,8 +41,18 @@ MAX_PROMPT_CHARS = 4000
 
 # Bounded retry for transient upstream errors (rate limit / capacity).
 _MAX_ATTEMPTS = 3
-_RETRY_BACKOFF_SECONDS = 1.5
+_RETRY_BASE_DELAY_SECONDS = 1.5
+_RETRY_MAX_DELAY_SECONDS = 20.0
 _RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+_RATE_LIMIT_STATUS = 429
+
+
+class ImageRateLimitedError(RuntimeError):
+    """The upstream image model rate-limited us (429 / quota).
+
+    Raised instead of the generic ``RuntimeError`` so the router can return a
+    distinct 429 with an actionable message rather than a blanket 502.
+    """
 
 
 def _sniff_mime(data: bytes) -> str:
@@ -58,14 +68,42 @@ def _sniff_mime(data: bytes) -> str:
     return OUTPUT_MIME
 
 
+def _status_of(exc: Exception) -> int | None:
+    code = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    return code if isinstance(code, int) else None
+
+
+def _is_rate_limited(exc: Exception) -> bool:
+    """True when the upstream rejected us specifically for rate limit / quota."""
+    if _status_of(exc) == _RATE_LIMIT_STATUS:
+        return True
+    return type(exc).__name__ == "ResourceExhausted"
+
+
 def _is_retryable(exc: Exception) -> bool:
     """True for transient Google API errors worth retrying."""
-    code = getattr(exc, "code", None) or getattr(exc, "status_code", None)
-    if isinstance(code, int) and code in _RETRYABLE_STATUS:
+    status = _status_of(exc)
+    if status is not None and status in _RETRYABLE_STATUS:
         return True
     # google.genai raises ServerError (5xx) / APIError with a numeric status.
     name = type(exc).__name__
     return name in ("ServerError", "ServiceUnavailable", "ResourceExhausted")
+
+
+def _retry_delay_seconds(exc: Exception, attempt: int) -> float:
+    """Backoff before attempt ``attempt + 1``.
+
+    A 429 is a quota window, not a blip: the old flat ``1.5s * attempt`` burned
+    every remaining attempt inside the same rate-limit window and always failed.
+    5xx capacity errors still back off quickly. The SDK's own ``RetryInfo`` wins
+    when present, since it carries the server's real reset delay.
+    """
+    retry_info = getattr(exc, "retry_info", None)
+    server_delay = getattr(retry_info, "retry_delay", None)
+    if isinstance(server_delay, (int, float)) and server_delay > 0:
+        return min(float(server_delay), _RETRY_MAX_DELAY_SECONDS)
+    growth = 4 if _is_rate_limited(exc) else 2
+    return min(_RETRY_BASE_DELAY_SECONDS * (growth**attempt), _RETRY_MAX_DELAY_SECONDS)
 
 
 def _resolve_image_config() -> tuple[str, str]:
@@ -166,13 +204,19 @@ async def generate_image(
             # Log only the exception type: the underlying SDK error can embed the
             # API key (request URL/headers), so never log the message or traceback.
             if _is_retryable(e) and attempt < _MAX_ATTEMPTS:
+                delay = _retry_delay_seconds(e, attempt)
                 logger.warning(
-                    "Image generation transient error (%s), retry %d/%d",
-                    type(e).__name__, attempt, _MAX_ATTEMPTS,
+                    "Image generation transient error (%s), retry %d/%d in %.1fs",
+                    type(e).__name__, attempt, _MAX_ATTEMPTS, delay,
                 )
-                await asyncio.sleep(_RETRY_BACKOFF_SECONDS * attempt)
+                await asyncio.sleep(delay)
                 continue
             logger.error("Image generation call failed: %s", type(e).__name__)
+            if _is_rate_limited(e):
+                raise ImageRateLimitedError(
+                    "Image generation is rate limited by the AI provider. "
+                    "Please try again in a moment."
+                ) from e
             raise RuntimeError("Image generation failed") from e
 
     image_bytes = _extract_image_bytes(response)

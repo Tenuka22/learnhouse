@@ -959,6 +959,10 @@ class ResourceAccessChecker:
             from src.db.media.media import Media
             statement = select(Media).where(Media.media_uuid == resource_uuid)
             resource = (await self.db_session.execute(statement)).scalars().first()
+        elif config.resource_type == "question_sets":
+            from src.db.question_sets.question_sets import QuestionSet
+            statement = select(QuestionSet).where(QuestionSet.question_set_uuid == resource_uuid)
+            resource = (await self.db_session.execute(statement)).scalars().first()
 
         elif config.resource_type == "boards":
             from src.db.boards import Board

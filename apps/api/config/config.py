@@ -31,6 +31,9 @@ class Judge0Config(BaseModel):
 
 class GeneralConfig(BaseModel):
     development_mode: bool
+    # Whether an email+password signup must verify its address before signing in.
+    # SaaS forces this on at the call site; this flag is the self-hosted opt-in.
+    email_verification: bool = False
     sentry_config: SentryConfig
     saas_mode: bool
     env: str
@@ -245,6 +248,17 @@ def get_learnhouse_config() -> LearnHouseConfig:
     # Sentry config
     env_sentry_dsn = os.environ.get("LEARNHOUSE_SENTRY_DSN")
     sentry_dsn = env_sentry_dsn or yaml_config.get("general", {}).get("sentry_dsn")
+
+    # Email verification: SaaS requires it unconditionally; a self-hosted install
+    # opts in so it can refuse unproven addresses (fake accounts, typo signups)
+    # on a mailer it controls. Unset keeps the legacy self-hosted behaviour of
+    # auto-verifying every address.
+    env_email_verification_str = os.environ.get("LEARNHOUSE_EMAIL_VERIFICATION", "None")
+    email_verification = (
+        env_email_verification_str.lower() in ("true", "1", "yes")
+        if env_email_verification_str != "None"
+        else yaml_config.get("general", {}).get("email_verification", False)
+    )
 
     # Environment (dev or prod)
     learnhouse_env = os.environ.get("LEARNHOUSE_ENV", "dev")
@@ -729,6 +743,7 @@ def get_learnhouse_config() -> LearnHouseConfig:
         contact_email=contact_email,
         general_config=GeneralConfig(
             development_mode=bool(development_mode),
+            email_verification=bool(email_verification),
             sentry_config=SentryConfig(dsn=sentry_dsn),
             saas_mode=bool(saas_mode),
             env=learnhouse_env,

@@ -7,6 +7,7 @@ from src.db.playgrounds import PlaygroundCreate, PlaygroundRead, PlaygroundUpdat
 from src.db.playground_reactions import PlaygroundReactionSummary
 from src.db.users import PublicUser, AnonymousUser
 from src.security.auth import get_current_user
+from src.security.api_token_utils import get_authenticated_non_api_token_user
 from src.security.features_utils.dependencies import require_playgrounds_feature
 from src.services.playgrounds.playgrounds import (
     create_playground,
@@ -27,6 +28,13 @@ from src.services.playgrounds.playground_reactions import (
 
 router = APIRouter(dependencies=[Depends(require_playgrounds_feature)])
 
+# Public playgrounds are served to anonymous visitors, so the read endpoints
+# below deliberately do NOT carry this dependency. The router is mounted with
+# the anonymous-admitting `get_non_api_token_user` (see src/router.py); every
+# mutating or access-managing route re-imposes it here, so this must be added
+# per-route rather than at the router level.
+_requires_auth = [Depends(get_authenticated_non_api_token_user)]
+
 
 @router.post(
     "/",
@@ -39,6 +47,7 @@ router = APIRouter(dependencies=[Depends(require_playgrounds_feature)])
         403: {"description": "Insufficient permissions to create playgrounds"},
         404: {"description": "Organization not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_create_playground(
     request: Request,
@@ -102,6 +111,7 @@ async def api_get_playground(
         403: {"description": "Insufficient permissions to update playground"},
         404: {"description": "Playground not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_update_playground(
     request: Request,
@@ -123,6 +133,7 @@ async def api_update_playground(
         403: {"description": "Insufficient permissions to delete playground"},
         404: {"description": "Playground not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_delete_playground(
     request: Request,
@@ -144,6 +155,7 @@ async def api_delete_playground(
         403: {"description": "Insufficient permissions to create playgrounds"},
         404: {"description": "Playground not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_duplicate_playground(
     request: Request,
@@ -166,6 +178,7 @@ async def api_duplicate_playground(
         403: {"description": "Insufficient permissions to update playground"},
         404: {"description": "Playground or organization not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_update_playground_thumbnail(
     request: Request,
@@ -187,6 +200,7 @@ async def api_update_playground_thumbnail(
         403: {"description": "Insufficient permissions"},
         404: {"description": "Playground or user group not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_add_usergroup_to_playground(
     request: Request,
@@ -210,6 +224,7 @@ async def api_add_usergroup_to_playground(
         403: {"description": "Insufficient permissions"},
         404: {"description": "Playground, user group, or association not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_remove_usergroup_from_playground(
     request: Request,
@@ -234,6 +249,7 @@ async def api_remove_usergroup_from_playground(
         403: {"description": "Access denied to this playground"},
         404: {"description": "Playground not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_get_playground_usergroups(
     request: Request,
@@ -272,6 +288,7 @@ async def api_get_playground_reactions(
         401: {"description": "Authentication required"},
         404: {"description": "Playground not found"},
     },
+    dependencies=_requires_auth,
 )
 async def api_toggle_playground_reaction(
     request: Request,

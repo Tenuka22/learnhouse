@@ -1,5 +1,28 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { ArrowUpRight, CircleNotch, ClockCounterClockwise, Image, ImageBroken, MagicWand, Sparkle, Trash, X } from '@phosphor-icons/react'
+import {
+  ArrowUpRight,
+  Bank,
+  Brain,
+  ChartBar,
+  CircleNotch,
+  ClockCounterClockwise,
+  Flask,
+  Globe,
+  Image,
+  ImageBroken,
+  Lightbulb,
+  MagicWand,
+  Mountains,
+  MusicNote,
+  Palette,
+  Robot,
+  RocketLaunch,
+  Shapes,
+  Sparkle,
+  Trash,
+  X,
+  type Icon,
+} from '@phosphor-icons/react'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -22,6 +45,12 @@ export interface AIImagePickerProps {
   onSelectFile?: (_file: File) => void | Promise<void>
   onClose: () => void
   isOpen?: boolean
+  // Explicit org scope, for surfaces that render OUTSIDE an <OrgProvider>
+  // (the /editor/* routes). Falls back to OrgContext when omitted. Generation
+  // is org-scoped server-side (org credits + org storage), so a surface with
+  // neither source cannot generate.
+  orgId?: number
+  orgUUID?: string
 }
 
 interface GeneratedItem {
@@ -30,6 +59,9 @@ interface GeneratedItem {
   url: string
   prompt: string
   failed?: boolean
+  // No real image: generation errored, this is a synthesized icon+gradient
+  // mirror of the prompt so the grid never just goes silent on failure.
+  local?: boolean
 }
 
 const PROMPT_IDEAS = [
@@ -39,10 +71,54 @@ const PROMPT_IDEAS = [
   'A watercolor landscape for a history lesson',
 ]
 
-const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, onClose, isOpen = true }) => {
-  const org = useOrg() as any
+// Prompt keyword -> icon, for the local fallback tile. Order matters: first
+// match wins.
+const FALLBACK_ICON_RULES: Array<{ keywords: string[]; icon: Icon }> = [
+  { keywords: ['lightbulb', 'idea', 'bulb'], icon: Lightbulb },
+  { keywords: ['robot', 'machine', 'bot'], icon: Robot },
+  { keywords: ['geometric', 'abstract', 'shape', 'pattern'], icon: Shapes },
+  { keywords: ['art', 'paint', 'watercolor', 'color', 'design'], icon: Palette },
+  { keywords: ['brain', 'mind', 'think', 'psychology', 'neuro'], icon: Brain },
+  { keywords: ['book', 'read', 'literature', 'lesson', 'study'], icon: Bank },
+  { keywords: ['data', 'chart', 'graph', 'statistic', 'analytic'], icon: ChartBar },
+  { keywords: ['landscape', 'mountain', 'nature', 'hike', 'history'], icon: Mountains },
+  { keywords: ['music', 'song', 'sound', 'audio'], icon: MusicNote },
+  { keywords: ['science', 'chemistry', 'lab', 'experiment'], icon: Flask },
+  { keywords: ['world', 'geography', 'global', 'map'], icon: Globe },
+  { keywords: ['space', 'rocket', 'launch', 'astro'], icon: RocketLaunch },
+]
+
+const FALLBACK_GRADIENTS: Array<[string, string, string]> = [
+  ['#a7c7ff', '#d8b4fe', '#fbcfe8'],
+  ['#bbf7d0', '#a5f3fc', '#bae6fd'],
+  ['#fde68a', '#fca5a5', '#f9a8d4'],
+  ['#c7d2fe', '#ddd6fe', '#fbcfe8'],
+  ['#fed7aa', '#fde68a', '#bbf7d0'],
+  ['#a5f3fc', '#bfdbfe', '#ddd6fe'],
+]
+
+function hashPrompt(prompt: string): number {
+  let h = 0
+  for (let i = 0; i < prompt.length; i++) h = (h * 31 + prompt.charCodeAt(i)) >>> 0
+  return h
+}
+
+function pickFallbackIcon(prompt: string): Icon {
+  const text = prompt.toLowerCase()
+  for (const rule of FALLBACK_ICON_RULES) {
+    if (rule.keywords.some((k) => text.includes(k))) return rule.icon
+  }
+  return Sparkle
+}
+
+const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, onClose, isOpen = true, orgId: orgIdProp, orgUUID: orgUUIDProp }) => {
+  const contextOrg = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+
+  // Prefer the explicit prop (editor routes); fall back to OrgContext.
+  const orgId = orgIdProp ?? contextOrg?.id
+  const orgUUID = orgUUIDProp ?? contextOrg?.org_uuid
 
   const [tab, setTab] = useState<'generate' | 'history'>('generate')
   const [prompt, setPrompt] = useState('')
@@ -64,25 +140,42 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
   const [historyLoading, setHistoryLoading] = useState(false)
 
   const loadHistory = useCallback(async () => {
-    if (!org?.id || !access_token) return
+    if (!orgId || !access_token) return
     setHistoryLoading(true)
-    const res = await fetchAIImageHistory(org.id, access_token)
+    const res = await fetchAIImageHistory(orgId, access_token)
     if (res.success && Array.isArray(res.data)) setHistory(res.data)
     setHistoryLoading(false)
-  }, [org?.id, access_token])
+  }, [orgId, access_token])
 
   useEffect(() => {
     if (tab === 'history') loadHistory()
   }, [tab, loadHistory])
 
+  // Generation failed: never leave the grid blank. Synthesize a local
+  // icon+gradient tile from the prompt so there's still visual feedback,
+  // not just the red error banner.
+  const pushLocalFallback = (promptText: string) => {
+    if (!promptText) return
+    setItems((prev) => [
+      { ai_generation_uuid: `local-${Date.now()}`, file_id: '', url: '', prompt: promptText, local: true },
+      ...prev,
+    ])
+  }
+
   const handleGenerate = async () => {
-    if (!prompt.trim() || generating || !org?.id) return
+    if (!prompt.trim() || generating) return
+    // Never fail silently: without an org there is no endpoint to call, and a
+    // silent return looks exactly like a broken button.
+    if (!orgId) {
+      setError('AI image generation needs an organization. Open this page from inside an organization to generate images.')
+      return
+    }
     setGenerating(true)
     setError(null)
     try {
       const res = await generateAIImage(
         {
-          org_id: org.id,
+          org_id: orgId,
           prompt: prompt.trim(),
           session_uuid: sessionUuid,
           // Refine by file_id: the backend reads the source image from storage
@@ -96,9 +189,10 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
       const message = typeof detail === 'string' ? detail : 'Image generation failed. Please try again.'
       if (!res.success || !res.data?.file_id || !res.data?.ai_generation_uuid) {
         setError(message)
+        pushLocalFallback(prompt.trim())
         return
       }
-      const url = aiImageUrl(org.org_uuid, res.data.file_id)
+      const url = aiImageUrl(orgUUID, res.data.file_id)
       setItems((prev) => [
         { ai_generation_uuid: res.data.ai_generation_uuid, file_id: res.data.file_id, url, prompt: prompt.trim() },
         ...prev,
@@ -108,6 +202,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
       setPrompt('')
     } catch {
       setError('Image generation failed. Please try again.')
+      pushLocalFallback(prompt.trim())
     } finally {
       setGenerating(false)
     }
@@ -125,7 +220,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
     try {
       setUsingKey(key)
       setError(null)
-      const file = await fetchAIImageFile(org.id, fileId, access_token)
+      const file = await fetchAIImageFile(orgId, fileId, access_token)
       await onSelectFile(file)
       onClose()
     } catch {
@@ -263,7 +358,23 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
                 {items.map((item) => (
                   <div key={item.ai_generation_uuid} className="group flex flex-col gap-1.5">
                     <div className="relative w-full pb-[75%] rounded-2xl overflow-hidden nice-shadow bg-neutral-100">
-                      {item.failed ? (
+                      {item.local ? (
+                        <div
+                          className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-3 text-center"
+                          style={{
+                            background: `linear-gradient(135deg, ${FALLBACK_GRADIENTS[hashPrompt(item.prompt) % FALLBACK_GRADIENTS.length].join(', ')})`,
+                          }}
+                        >
+                          {React.createElement(pickFallbackIcon(item.prompt), {
+                            weight: 'duotone',
+                            size: 28,
+                            className: 'text-white drop-shadow-sm',
+                          })}
+                          <span className="text-[11px] font-medium text-white/90 drop-shadow-sm line-clamp-2">
+                            Couldn't generate — showing a placeholder
+                          </span>
+                        </div>
+                      ) : item.failed ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-[11px] text-neutral-400 px-2 text-center">
                           <ImageBroken weight="duotone" size={18} />
                           Image failed to load
@@ -282,7 +393,20 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
                           }
                         />
                       )}
-                      {!item.failed && (
+                      {item.local && (
+                        <div className="absolute inset-0 bg-neutral-900/0 group-hover:bg-neutral-900/25 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <button
+                            onClick={() => {
+                              setPrompt(item.prompt)
+                              requestAnimationFrame(() => promptRef.current?.focus())
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-white text-neutral-900 text-sm font-medium flex items-center gap-1.5 nice-shadow"
+                          >
+                            <Sparkle weight="duotone" size={15} /> Retry
+                          </button>
+                        </div>
+                      )}
+                      {!item.local && !item.failed && (
                         <div className="absolute inset-0 bg-neutral-900/0 group-hover:bg-neutral-900/45 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                           {renderUseButton(item.ai_generation_uuid, item.file_id, item.url)}
                           <button
@@ -316,7 +440,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
           ) : (
             <div className="grid grid-cols-3 gap-4">
               {history.map((h) => {
-                const url = aiImageUrl(org.org_uuid, h.file_id)
+                const url = aiImageUrl(orgUUID, h.file_id)
                 return (
                   <div key={h.ai_generation_uuid} className="group flex flex-col gap-1.5">
                     <div className="relative w-full pb-[75%] rounded-2xl overflow-hidden nice-shadow bg-neutral-100">

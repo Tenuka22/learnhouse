@@ -35,6 +35,10 @@ export const queryKeys = {
     list: (orgId: number) => ['media', orgId] as const,
     detail: (uuid: string) => ['media', uuid] as const,
   },
+  questionSets: {
+    list: (orgId: number) => ['question-sets', orgId] as const,
+    detail: (uuid: string) => ['question-set', uuid] as const,
+  },
   community: {
     list: (orgId: number, page?: number) => ['communities', orgId, page] as const,
     detail: (uuid: string) => ['community', uuid] as const,

@@ -140,6 +140,7 @@ ADMIN_RIGHTS = Rights(
     podcasts=_full_permission_with_own(),
     boards=_full_permission_with_own(),
     playgrounds=_full_permission_with_own(),
+    question_sets=_full_permission(),
 )
 
 USER_RIGHTS = Rights(
@@ -158,6 +159,7 @@ USER_RIGHTS = Rights(
     podcasts=_readonly_permission_with_own(),
     boards=_readonly_permission_with_own(),
     playgrounds=_readonly_permission_with_own(),
+    question_sets=_readonly_permission(),
 )
 
 
