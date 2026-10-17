@@ -13,7 +13,6 @@ Create Date: 2026-10-17 13:00:00.000000
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa  # noqa: F401
 import sqlmodel  # noqa: F401
 

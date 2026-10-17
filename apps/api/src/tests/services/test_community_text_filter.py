@@ -5,8 +5,6 @@ substring search, which (a) rejected ordinary coursework and (b) accepted
 obfuscated spellings. Both directions matter, so both are asserted.
 """
 
-import importlib.util
-
 from src.services.communities.text_filter import (
     find_forbidden_terms,
     mask_forbidden_terms,
