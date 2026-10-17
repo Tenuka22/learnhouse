@@ -2,6 +2,7 @@ name: Web Lint
 on:
   push:
     branches:
+      - main
       - dev
     paths:
       - "apps/web/**"
