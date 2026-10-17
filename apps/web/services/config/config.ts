@@ -160,6 +160,30 @@ const getInternalApiOrigin = (): string =>
   getConfig('LEARNHOUSE_INTERNAL_API_URL', 'http://127.0.0.1:9000').replace(/\/+$/, '')
 
 /**
+ * Backend origin for `fetch` calls made BY the Next.js server (auth proxy
+ * routes, server-side session reads).
+ *
+ * Resolution order:
+ *   1. LEARNHOUSE_INTERNAL_API_URL — the documented "as reached FROM the
+ *      Next.js server" origin. In the all-in-one image that is uvicorn on 9000.
+ *   2. NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL — what `learnhouse dev` writes into
+ *      apps/web/.env.local, i.e. the local dev API on 1338.
+ *   3. http://127.0.0.1:9000 — the in-container default.
+ *
+ * The last resort used to be http://localhost:1338: a dev-only port that no
+ * Docker deployment listens on. A deploy that simply omitted
+ * NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL therefore failed with a bare
+ * "connect ECONNREFUSED ::1:1338" instead of reaching its own API, with
+ * nothing in the logs pointing at the missing variable.
+ */
+export const getServerBackendOrigin = (): string =>
+  (
+    getConfig('LEARNHOUSE_INTERNAL_API_URL') ||
+    getConfig('NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL') ||
+    'http://127.0.0.1:9000'
+  ).replace(/\/+$/, '')
+
+/**
  * Turn a possibly-relative API base into an absolute URL.
  *
  * A relative base ("/api/v1/") is the right value in the BROWSER — it keeps

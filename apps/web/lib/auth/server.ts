@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
+import { getServerBackendOrigin } from '@services/config/config'
 
-const BACKEND_URL = (process.env.NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL || 'http://localhost:1338').replace(/\/+$/, '')
+const BACKEND_URL = getServerBackendOrigin()
 
 // Cookie names (must match the API routes)
 const ACCESS_TOKEN_COOKIE = 'LH_access'
