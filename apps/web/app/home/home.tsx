@@ -151,17 +151,22 @@ function HomeClient() {
                         <span>{t('common.language')}</span>
                       </DropdownMenuSubTrigger>
                       <DropdownMenuPortal>
-                        <DropdownMenuSubContent>
+                        <DropdownMenuSubContent className="max-h-[min(22rem,var(--radix-dropdown-menu-content-available-height))] w-60 overflow-y-auto">
                           {AVAILABLE_LANGUAGES.map((language) => (
                             <DropdownMenuItem
                               key={language.code}
                               onClick={() => changeLanguage(language.code)}
-                              className="flex items-center justify-between"
+                              className="flex items-center justify-between gap-3"
                             >
-                              <span>
-                                {t(language.translationKey)} ({language.nativeName})
+                              <span className="flex min-w-0 flex-col leading-tight">
+                                <span className="truncate">{language.nativeName}</span>
+                                {t(language.translationKey) !== language.nativeName && (
+                                  <span className="truncate text-xs opacity-60">
+                                    {t(language.translationKey)}
+                                  </span>
+                                )}
                               </span>
-                              {i18n.language.split('-')[0] === language.code && <Check size={14} />}
+                              {i18n.language.split('-')[0] === language.code && <Check size={14} className="shrink-0" />}
                             </DropdownMenuItem>
                           ))}
                         </DropdownMenuSubContent>

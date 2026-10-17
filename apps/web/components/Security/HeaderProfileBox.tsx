@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react'
 
 import Link from 'next/link'
-import { Crown, Shield, User, Users, SignOut, CaretDown, Globe, Check, ShoppingBag, House, Buildings, Plus, CreditCard } from '@phosphor-icons/react'
+import { Crown, Shield, User, Users, SignOut, CaretDown, Globe, Check, ShoppingBag, House, Buildings, Plus, CreditCard, MagnifyingGlass } from '@phosphor-icons/react'
 import UserAvatar from '@components/Objects/UserAvatar'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -25,7 +25,7 @@ import {
 import { signOut } from '@components/Contexts/AuthContext'
 import { useTranslation } from 'react-i18next'
 import { changeLanguage } from '@/lib/i18n'
-import { AVAILABLE_LANGUAGES } from '@/lib/languages'
+import { AVAILABLE_LANGUAGES, getCurrentLanguageNativeName } from '@/lib/languages'
 import LanguageSwitcher from '@components/Utils/LanguageSwitcher'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
@@ -55,6 +55,42 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
   // "My Organizations" submenu. Only relevant in multi-org (SaaS) mode, where
   // the apex hub (/home, /new, /billing) exists.
   const multiOrg = isMultiOrgModeEnabled()
+
+  // Language submenu filter. With 20+ locales the raw list overflows the
+  // viewport, so the menu is searchable and matches on native name, the
+  // translated name, or the ISO code.
+  const [languageQuery, setLanguageQuery] = React.useState('')
+  const filteredLanguages = useMemo(() => {
+    const needle = languageQuery.trim().toLowerCase()
+    if (!needle) return AVAILABLE_LANGUAGES
+    // Strip combining marks so "francais" still matches "Français".
+    const squash = (value: string) =>
+      value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    return AVAILABLE_LANGUAGES.filter((language) => {
+      const candidates = [
+        language.nativeName,
+        language.translationKey.split('.').pop() || '',
+        t(language.translationKey),
+        language.code,
+      ]
+      return candidates.some((candidate) => squash(candidate).includes(needle))
+    })
+  }, [languageQuery, t])
+
+  // Radix keeps keyboard focus on the menu items, so a search field inside the
+  // menu would never see a keystroke. Capture printable keys here and drive the
+  // filter directly, leaving Radix's own navigation keys alone. Keystrokes
+  // aimed at the input are left to the input.
+  const handleLanguageMenuKeyDown = (event: React.KeyboardEvent) => {
+    if (event.target instanceof HTMLInputElement) return
+    if (event.key === 'Backspace') {
+      setLanguageQuery((current) => current.slice(0, -1))
+      return
+    }
+    if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      setLanguageQuery((current) => current + event.key)
+    }
+  }
   const myOrgs = useMemo(() => {
     const roles = session?.data?.roles || []
     const seen = new Set<number>()
@@ -309,19 +345,58 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                   <DropdownMenuSubTrigger className="flex items-center gap-2 space-x-2">
                     <Globe size={14} weight="fill" />
                     <span>{t('common.language')}</span>
+                    <span className="ml-auto text-xs opacity-60">
+                      {getCurrentLanguageNativeName(i18n.language?.split('-')[0] ?? '')}
+                    </span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      {AVAILABLE_LANGUAGES.map((language) => (
-                        <DropdownMenuItem 
-                          key={language.code}
-                          onClick={() => changeLanguage(language.code)}
-                          className="flex items-center justify-between"
-                        >
-                          <span>{t(language.translationKey)} ({language.nativeName})</span>
-                          {i18n.language.split('-')[0] === language.code && <Check size={14} weight="bold" />}
-                        </DropdownMenuItem>
-                      ))}
+                    <DropdownMenuSubContent
+                      className="max-h-[min(22rem,var(--radix-dropdown-menu-content-available-height))] w-60 overflow-y-auto"
+                      onKeyDown={handleLanguageMenuKeyDown}
+                    >
+                      <div
+                        className="sticky top-0 z-10 flex items-center gap-2 bg-popover px-2 pb-1.5 pt-1"
+                        // Without this, Radix's typeahead swallows every keystroke.
+                        onKeyDown={(event) => event.stopPropagation()}
+                      >
+                        <MagnifyingGlass size={14} className="shrink-0 opacity-60" />
+                        <input
+                          value={languageQuery}
+                          onChange={(event) => setLanguageQuery(event.target.value)}
+                          placeholder={t('common.search')}
+                          aria-label={t('common.search')}
+                          className="w-full bg-transparent text-sm outline-none placeholder:opacity-60"
+                        />
+                      </div>
+                      {filteredLanguages.length === 0 ? (
+                        <p className="px-2 py-4 text-center text-sm opacity-60">
+                          {t('common.no_results')}
+                        </p>
+                      ) : (
+                        filteredLanguages.map((language) => (
+                          <DropdownMenuItem
+                            key={language.code}
+                            onClick={() => changeLanguage(language.code)}
+                            className="flex items-center justify-between gap-3"
+                          >
+                            {/* Native name leads: it is what the reader
+                                recognises. The translated name is secondary,
+                                and is skipped when it only repeats the native
+                                one ("English (English)"). */}
+                            <span className="flex min-w-0 flex-col leading-tight">
+                              <span className="truncate">{language.nativeName}</span>
+                              {t(language.translationKey) !== language.nativeName && (
+                                <span className="truncate text-xs opacity-60">
+                                  {t(language.translationKey)}
+                                </span>
+                              )}
+                            </span>
+                            {i18n.language.split('-')[0] === language.code && (
+                              <Check size={14} weight="bold" className="shrink-0" />
+                            )}
+                          </DropdownMenuItem>
+                        ))
+                      )}
                     </DropdownMenuSubContent>
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
