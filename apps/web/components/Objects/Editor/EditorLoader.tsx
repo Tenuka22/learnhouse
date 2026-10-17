@@ -117,7 +117,6 @@ export default function EditorLoader({ courseid: _courseid, activityuuid }: Edit
         </div>
       )}
       <OnboardingTracker />
-      </div>
-    )
+    </div>
   )
 }
