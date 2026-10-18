@@ -945,5 +945,108 @@
         }
       }
     }
+  },
+  "dashboard": {
+    "nav": {
+      "sidebar_navigation": "උපකරණ පුවරුවේ මෙවලම් තීරුව",
+      "collapse_sidebar": "පැත්තබඩ අපිහැකින්න",
+      "expand_sidebar": "පැත්තබඩ පුරාණනය කරන්න",
+      "other": "වෙනත්",
+      "mobile_navigation": "උපකරණ පුවරුවේ ජංගම මෙවලම් තීරුව",
+      "open_courses_menu": "කෝස්තු මෙනුව විවෘත කරන්න",
+      "open_assignments_menu": "පැවරුම් මෙනුව විවෘත කරන්න",
+      "open_users_menu": "පරිශීලක මෙනුව විවෘත කරන්න",
+      "open_organization_menu": "සංවිධාන මෙනුව විවෘත කරන්න",
+      "open_developers_menu": "සංවර්ධක මෙනුව විවෘත කරන්න",
+      "open_language_menu": "භාෂා මෙනුව විවෘත කරන්න",
+      "open_help_menu": "උදව් මෙනුව විවෘත කරන්න",
+      "open_organizations_menu": "සංවිධාන මෙනුව විවෘත කරන්න"
+    },
+    "users": {
+      "settings": {
+        "tabs": {
+          "users": "පරිශීලකයින්",
+          "usergroups": "පරිශීලක කණ්ඩායම්",
+          "roles": "භූමිකා",
+          "signups": "ලියාපදිංචි සහ ආරාධන කේත",
+          "add": "සාමාණිකයන් එකතු කරන්න"
+        }
+      }
+    },
+    "organization": {
+      "settings": {
+        "tabs": {
+          "general": "සාමාන්‍ය",
+          "branding": "අලකුණු කිරීම",
+          "landing": "මුල් පිටුව",
+          "ai": "AI",
+          "usage": "භාවිතය",
+          "other": "වෙනත්",
+          "api": "API ප්‍රවේශය",
+          "automations": "ස්වයංක්‍රීයකරණ",
+          "domains": "මDomains",
+          "sso": "SSO"
+        }
+      }
+    },
+    "developers": {
+      "breadcrumb": "සංවර්ධකයින්"
+    }
+  },
+  "analytics": {
+    "tabs": {
+      "overview": "දළුවත්භාවය",
+      "advanced": "උසස් පරිටාව"
+    }
+  },
+  "courses": {
+    "courses": "කෝස්තු",
+    "progress": "ප්‍රගමනය",
+    "no_courses": "තවම කෝස්තු නැත",
+    "sign_in_to_see_courses": "ඔබගේ කෝස්තු බැලීමට පිවිසෙන්න",
+    "sign_in_to_see_courses_description": "මෙම අක්ෂයේ කෝස්තු ඔබ පිවිසුම් වූ පසු පමණක් දැකිය හැකිය.",
+    "create_courses_placeholder": "අන්තර්ගතය එක් කිරීමට කෝස්තු සෑදා ගන්න",
+    "view_all_courses": "සියලුම කෝස්තු බලන්න",
+    "published": "ප්‍රකාශය කරන ලදී",
+    "unpublished": "ප්‍රකාශය කළ නැත",
+    "start_learning": "ඉගෙනුම් අරන්ත කරන්න",
+    "edit_content": "අන්තර්ගතය සංස්කරණය කරන්න",
+    "deleting_course": "කෝස්තුව මකමින්...",
+    "course_deleted_success": "කෝස්තුව කාර්යක්ෂයෙන් මකා දැමී ඇත",
+    "course_deleted_error": "කෝස්තුව මැකීමට නොහැකි විය",
+    "cloning_course": "කෝස්තුව ප්‍රතිරාවනය කරමින්...",
+    "course_cloned_success": "කෝස්තුව කාර්යක්ෂයෙන් ප්‍රතිරාවනය කරන ලදී",
+    "course_cloned_error": "කෝස්තුව ප්‍රතිරාවනය කිරීමට නොහැකි විය",
+    "course_exported_error": "කෝස්තුව නිරාථනය කිරීමට නොහැකි විය",
+    "clone_course": "කෝස්තුව ප්‍රතිරාවනය කරන්න",
+    "clone_course_title": "\"{{name}}\" ප්‍රතිරාවනය කරන්න",
+    "clone_course_confirm": "මෙය අභිචාර, ක්‍රියා සහ ගොනු ඇතුළම කෝස්තුවේ සම්පූර්ණ පිටපතක් නිරූපණය කරයි. ප්‍රතිරාවනය කළ කෝස්තුව පෞද්ගලික ලෙස සකසනු ලැබේ.",
+    "export_course": "කෝස්තුව නිරාථනය කරන්න",
+    "delete_course": "කෝස්තුව මකන්න",
+    "delete_course_title": "{{name}} මකන්නද?",
+    "delete_course_confirm": "ඔබට මෙම කෝස්තුව මැකීමට අවශ්‍යද?"
+  },
+  "podcasts": {
+    "podcasts": "පොඩිකාස්ට්‍රිම්",
+    "published": "ප්‍රකාශය කරන ලදී",
+    "unpublished": "ප්‍රකාශය කළ නැත",
+    "listen_now": "දැන්ම අහන්න",
+    "edit_content": "අන්තර්ගතය සංස්කරණය කරන්න",
+    "deleting_podcast": "පොඩිකාස්ට්‍රිමය මකමින්...",
+    "podcast_deleted_success": "පොඩිකාස්ට්‍රිමය කාර්යක්ෂයෙන් මකා දැමී ඇත",
+    "podcast_deleted_error": "පොඩිකාස්ට්‍රිමය මැකීමට නොහැකි විය",
+    "delete_podcast": "පොඩිකාස්ට්‍රිමය මකන්න",
+    "delete_podcast_title": "පොඩිකාස්ට්‍රිමය මකන්නද?",
+    "delete_podcast_confirm": "ඔබට මෙම පොඩිකාස්ට්‍රිමය මැකීමට අවශ්‍යද? මෙම ක්‍රියාව ආපසු හැරිය නොහැක සහ සියලුම කොටස මකා දැමේ."
+  },
+  "communities": {
+    "title": "ප්‍රජා සම්පූර්ණ"
+  },
+  "boards": {
+    "boards": "බෝරුඩ"
+  },
+  "user": {
+    "sign_out": "ඉවත් වන්න",
+    "user_settings": "පරිශීලක සැකසුම්"
   }
 }
