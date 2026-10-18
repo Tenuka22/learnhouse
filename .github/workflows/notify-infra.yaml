@@ -22,29 +22,55 @@ jobs:
   notify:
     name: Dispatch to Infrastructure Repo
     runs-on: ubuntu-latest
+    env:
+      # The PAT is checked HERE, at job-level `env`, and not in the job's `if`.
+      # Per the context-availability table, `jobs.<job_id>.if` may only use
+      # `github`, `needs`, `vars` and `inputs` — `secrets` resolves to empty
+      # there, so a `secrets.X != ''` guard would be false on EVERY run and
+      # silently disable the dispatch even in the repo that has it configured.
+      # `jobs.<job_id>.env` does allow `secrets`. Same split as lockfiles.yaml.
+      HAS_PAT: ${{ secrets.INFRA_REPO_PAT != '' }}
     # Dispatch only where the receiving side can act on it:
     #
-    #   forks:    GitHub does not expose secrets (INFRA_REPO_PAT) to fork PRs,
-    #             so the dispatch can only ever fail there.
-    #   drafts:   dispatched on `ready_for_review` instead.
-    #   bots:     automated dependency PRs are covered by the checks in this
-    #             repo; build-community.yaml still builds the image for them.
+    #   unconfigured: INFRA_REPO is a repository variable, and GitHub copies
+    #                 neither variables nor secrets into a fork. Without a
+    #                 destination the action aborts with "Parameter token or
+    #                 opts.auth is required", which failed EVERY push to main
+    #                 in every fork — b0bfb918 had already fixed this same
+    #                 class of failure for the pull_request path only. Gating on
+    #                 `vars` keeps a fork's CI green instead of reporting a red
+    #                 check for a dispatch nobody asked for.
+    #   drafts:       dispatched on `ready_for_review` instead.
+    #   bots:         automated dependency PRs are covered by the checks in this
+    #                 repo; build-community.yaml still builds the image for them.
     #
     # `closed` always dispatches, so teardown is never skipped.
     if: >-
-      github.event_name != 'pull_request' ||
+      vars.INFRA_REPO != '' &&
       (
-        github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event_name != 'pull_request' ||
         (
-          github.event.action == 'closed' ||
+          github.event.pull_request.head.repo.full_name == github.repository &&
           (
-            !github.event.pull_request.draft &&
-            !endsWith(github.event.pull_request.user.login, '[bot]')
+            github.event.action == 'closed' ||
+            (
+              !github.event.pull_request.draft &&
+              !endsWith(github.event.pull_request.user.login, '[bot]')
+            )
           )
         )
       )
     steps:
+      # A destination without a PAT is a misconfiguration rather than an
+      # unconfigured fork, so say so instead of skipping quietly — but do not
+      # fail the run, which is what made fork CI red.
+      - name: Report a missing PAT
+        if: env.HAS_PAT != 'true'
+        run: |
+          echo "::notice title=Infrastructure dispatch skipped::INFRA_REPO is set to '${{ vars.INFRA_REPO }}' but INFRA_REPO_PAT is not, so nothing was dispatched. Add the PAT under Settings > Secrets and variables > Actions."
+
       - name: Send repository dispatch
+        if: env.HAS_PAT == 'true'
         uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.INFRA_REPO_PAT }}
