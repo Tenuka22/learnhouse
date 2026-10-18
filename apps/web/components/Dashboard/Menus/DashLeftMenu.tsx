@@ -47,14 +47,14 @@ import { motion } from 'motion/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import CommandPaletteTrigger from '@components/Dashboard/CommandPalette/CommandPaletteTrigger'
 import LocaleLink from '@components/Utils/LocaleLink'
-import { usePathname, useRouter } from 'next/navigation'
+import { useLocaleSwitcher } from '@components/Contexts/LocaleContext'
+import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import UserAvatar from '../../Objects/UserAvatar'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg, getAPIUrl, getMainDomainUri, isMultiOrgModeEnabled } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
-import { changeLanguage } from '@/lib/i18n'
 import {
   Tooltip,
   TooltipContent,
@@ -70,7 +70,6 @@ import {
 } from "@components/ui/hover-menu"
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
-import { swapLocalePath } from '@/lib/locale'
 import OrgSquareLogo, { hasOrgLogo } from '@components/Objects/Org/OrgSquareLogo'
 import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
@@ -112,7 +111,7 @@ function DashLeftMenu() {
   const { t, i18n } = useTranslation()
   const { track } = useLHAnalytics('dashboard')
   const pathname = usePathname() || ''
-const router = useRouter()
+  const pickLocale = useLocaleSwitcher()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [upgradeHovered, setUpgradeHovered] = useState(false)
   // Onboarding takes over the search slot until setup is complete / dismissed.
@@ -1074,7 +1073,7 @@ const router = useRouter()
                 {AVAILABLE_LANGUAGES.map((language) => (
                   <HoverMenuItem
                     key={language.code}
-                    onClick={() => { changeLanguage(language.code); router.push(swapLocalePath(pathname, language.code)) }}
+                    onClick={() => pickLocale(language.code)}
                     className="flex items-center justify-between px-3 py-2.5 cursor-pointer text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
                   >
                     <div className="flex flex-col">

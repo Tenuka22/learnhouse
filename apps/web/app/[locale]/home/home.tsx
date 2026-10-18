@@ -39,10 +39,11 @@ import {
   DialogFooter,
 } from '@components/ui/dialog'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
-import { useLocalizedPath } from '@components/Contexts/LocaleContext'
+import { useLocalizedPath, useLocaleSwitcher } from '@components/Contexts/LocaleContext'
 
 function HomeClient() {
   const lp = useLocalizedPath()
+  const pickLocale = useLocaleSwitcher()
   const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const router = useRouter()
@@ -157,7 +158,7 @@ function HomeClient() {
                           {AVAILABLE_LANGUAGES.map((language) => (
                             <DropdownMenuItem
                               key={language.code}
-                              onClick={() => changeLanguage(language.code)}
+                              onClick={() => pickLocale(language.code)}
                               className="flex items-center justify-between gap-3"
                             >
                               <span className="flex min-w-0 flex-col leading-tight">

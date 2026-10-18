@@ -1,8 +1,14 @@
 'use client'
 
 import { createContext, useCallback, useContext } from 'react'
-import i18n from '@/lib/i18n'
-import { DEFAULT_LOCALE, localizePath, normalizeLocale } from '@/lib/locale'
+import { usePathname, useRouter } from 'next/navigation'
+import i18n, { changeLanguage } from '@/lib/i18n'
+import {
+  DEFAULT_LOCALE,
+  localizePath,
+  normalizeLocale,
+  swapLocalePath,
+} from '@/lib/locale'
 
 /**
  * Makes the URL's locale available to every client component below it.
@@ -55,4 +61,48 @@ export function useLocale(): string {
 export function useLocalizedPath(): (href: string) => string {
   const locale = useLocale()
   return useCallback((href: string) => localizePath(href, locale), [locale])
+}
+
+/**
+ * Marks the visitor as having chosen a language themselves.
+ *
+ * Without this, OrgLanguageSync treats the choice as incidental and re-applies
+ * the org's default_language on the next navigation — so picking Sinhala on one
+ * page silently reverted to English on the next, and the URL was rewritten back
+ * to /en/... to match. Idempotent, and a no-op in private mode.
+ */
+const USER_PICKED_KEY = 'i18nextLng_userPicked'
+
+export function markLanguagePicked() {
+  try {
+    localStorage.setItem(USER_PICKED_KEY, '1')
+  } catch {
+    /* private mode / sandboxed iframe */
+  }
+}
+
+/**
+ * The whole "user picked a language" action, in the one place it happens:
+ * record the choice, switch the language, and re-point the URL.
+ *
+ * There are five language menus in the product. They previously each did a
+ * different subset of this — two navigated but forgot the flag, two set the
+ * flag but never navigated, and a page-level org default would then undo the
+ * whole thing on the next route change. Anything that changes the UI language
+ * from a menu should call this rather than `changeLanguage` directly.
+ */
+export function useLocaleSwitcher() {
+  const router = useRouter()
+  const pathname = usePathname() || ''
+
+  return useCallback(
+    async (code: string) => {
+      markLanguagePicked()
+      await changeLanguage(code)
+
+      const next = swapLocalePath(pathname, code)
+      if (next !== pathname) router.push(next)
+    },
+    [pathname, router]
+  )
 }

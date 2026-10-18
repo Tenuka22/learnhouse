@@ -24,7 +24,7 @@ import {
 } from "@components/ui/dropdown-menu"
 import { signOut } from '@components/Contexts/AuthContext'
 import { useTranslation } from 'react-i18next'
-import { changeLanguage } from '@/lib/i18n'
+import { useLocaleSwitcher } from '@components/Contexts/LocaleContext'
 import { AVAILABLE_LANGUAGES, getCurrentLanguageNativeName } from '@/lib/languages'
 import LanguageSwitcher from '@components/Utils/LanguageSwitcher'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
@@ -50,6 +50,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
   const { t, i18n } = useTranslation()
   const { track } = useLHAnalytics()
   const colors = getMenuColorClasses(primaryColor)
+  const pickLocale = useLocaleSwitcher()
 
   // The user's organizations (deduped) from the session roles, used by the
   // "My Organizations" submenu. Only relevant in multi-org (SaaS) mode, where
@@ -376,7 +377,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                         filteredLanguages.map((language) => (
                           <DropdownMenuItem
                             key={language.code}
-                            onClick={() => changeLanguage(language.code)}
+                            onClick={() => pickLocale(language.code)}
                             className="flex items-center justify-between gap-3"
                           >
                             {/* Native name leads: it is what the reader

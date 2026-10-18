@@ -122,6 +122,82 @@ describe('switchLocalePath', () => {
   })
 })
 
+describe('language menus', () => {
+  const webRoot = path.resolve(import.meta.dirname, '..')
+  const ROOTS = ['app', 'components']
+  const SKIP = new Set(['node_modules', '.next', 'api', 'embed'])
+
+  // Synchronous, because the file list is built in the describe body and the
+  // `test` callbacks below are the only async ones.
+  function walk(dir) {
+    let entries
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true })
+    } catch {
+      return []
+    }
+    const out = []
+    for (const e of entries) {
+      const full = path.join(dir, e.name)
+      if (e.isDirectory()) {
+        if (!SKIP.has(e.name)) out.push(...walk(full))
+      } else if (/\.(tsx|ts)$/.test(e.name)) {
+        out.push(full)
+      }
+    }
+    return out
+  }
+
+  const files = ['app', 'components'].flatMap((r) => walk(path.join(webRoot, r)))
+
+  /**
+   * A menu that translates but doesn't navigate leaves the address bar on the
+   * old language, and a menu that doesn't set the user-picked flag gets undone
+   * by OrgLanguageSync on the next route change. Both shipped at once: the
+   * header profile menu did neither.
+   */
+  test('no menu changes the language without going through useLocaleSwitcher', () => {
+    const offenders = []
+    for (const file of files) {
+      const src = fs.readFileSync(file, 'utf8')
+      if (src.includes('useLocaleSwitcher')) continue
+      src.split('\n').forEach((line, i) => {
+        // Direct `changeLanguage(...)` calls from a menu.
+        if (/\bchangeLanguage\s*\(/.test(line) && !/import/.test(line)) {
+          // OrgLanguageSync and LocaleSync legitimately own this.
+          if (/OrgLanguageSync|LocaleSync/.test(file)) return
+          offenders.push(`${path.relative(webRoot, file)}:${i + 1} ${line.trim()}`)
+        }
+      })
+    }
+    expect(offenders).toEqual([])
+  })
+
+  test('the user-picked flag is set in exactly one place', () => {
+    const setters = []
+    for (const file of files) {
+      const src = fs.readFileSync(file, 'utf8')
+      // Either the literal key or the shared USER_PICKED_KEY constant.
+      if (/setItem\(\s*(?:USER_PICKED_KEY|['"]i18nextLng_userPicked['"])/.test(src)) {
+        setters.push(path.relative(webRoot, file))
+      }
+    }
+    // LocaleContext owns it; a second hand-rolled writer is how one menu ended
+    // up missing the flag in the first place.
+    expect(setters).toEqual([path.join('components', 'Contexts', 'LocaleContext.tsx')])
+  })
+
+  test('OrgLanguageSync still defers to an explicit choice', () => {
+    const src = fs.readFileSync(
+      path.join(webRoot, 'components', 'Contexts', 'OrgLanguageSync.tsx'),
+      'utf8'
+    )
+    // The org default must not fight the URL once the visitor has chosen.
+    expect(src).toContain('USER_PICKED_KEY')
+    expect(src).toMatch(/if \(userPicked\) return/)
+  })
+})
+
 describe('proxy locale handling', () => {
   const webRoot = path.resolve(import.meta.dirname, '..')
   // The locale logic lives in proxy.ts, not middleware.ts: Next 16 renamed the

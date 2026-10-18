@@ -1,12 +1,10 @@
 'use client'
 
 import React from 'react'
-import { usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { Languages, ChevronDown, Check } from 'lucide-react'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
-import { changeLanguage } from '@/lib/i18n'
-import { swapLocalePath } from '@/lib/locale'
+import { useLocaleSwitcher } from '@components/Contexts/LocaleContext'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import {
   DropdownMenu,
@@ -20,39 +18,31 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
   const { i18n } = useTranslation()
   const { track } = useLHAnalytics()
   const colors = getMenuColorClasses(primaryColor)
-  const pathname = usePathname()
-  const router = useRouter()
+  const pickLocale = useLocaleSwitcher()
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
 
   const currentLangCode = mounted ? i18n.language.split('-')[0].toUpperCase() : ''
 
   /**
-   * Picking a language navigates as well as translating.
+   * Picking a language navigates as well as translates.
    *
    * The URL is the thing people share, bookmark and come back to, so it has to
-   * agree with the language on screen. `swapLocalePath` keeps the visitor on the
-   * same page and only moves the prefix; middleware already redirects the
-   * language-less form, but navigating client-side avoids a full page load and
-   * keeps the change feeling instantaneous.
+   * agree with the language on screen. `useLocaleSwitcher` owns all three parts
+   * of that — record the choice (so an org default doesn't undo it on the next
+   * route change), preload and switch the bundle, and re-point the prefix —
+   * because getting only a subset right produced exactly the bug this fixed:
+   * the page changed language while the address bar kept the old one.
    *
    * The two unprefixed surfaces (`/api`, `/embed`) are returned untouched, so
    * switching language from inside an embed is a no-op rather than a dead link.
    */
   const selectLanguage = (code: string) => {
-    try {
-      localStorage.setItem('i18nextLng_userPicked', '1')
-    } catch { /* private mode */ }
-
     track(AnalyticsEvent.LanguageChanged, {
       language_code: code,
       source: 'language_switcher',
     })
-
-    changeLanguage(code)
-
-    const next = swapLocalePath(pathname, code)
-    if (next !== pathname) router.push(next)
+    pickLocale(code)
   }
 
   return (

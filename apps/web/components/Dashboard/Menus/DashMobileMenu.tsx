@@ -29,16 +29,15 @@ import {
 } from '@phosphor-icons/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import LocaleLink from '@components/Utils/LocaleLink'
-import { usePathname, useRouter } from 'next/navigation'
+import { useLocaleSwitcher } from '@components/Contexts/LocaleContext'
+import { usePathname } from 'next/navigation'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import UserAvatar from '../../Objects/UserAvatar'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg, getDeploymentMode } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
-import { changeLanguage } from '@/lib/i18n'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
-import { swapLocalePath } from '@/lib/locale'
 import OrgSquareLogo, { hasOrgLogo } from '@components/Objects/Org/OrgSquareLogo'
 import { cn } from '@/lib/utils'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -51,7 +50,7 @@ function DashMobileMenu() {
   const session = useLHSession() as any
   const { t, i18n } = useTranslation()
   const pathname = usePathname() || ''
-const router = useRouter()
+  const pickLocale = useLocaleSwitcher()
   const plan = usePlan()
   const { toggle: openSearch } = useCommandPalette()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -250,7 +249,7 @@ const router = useRouter()
                     {AVAILABLE_LANGUAGES.map(lang => (
                       <button
                         key={lang.code}
-                        onClick={() => { changeLanguage(lang.code); router.push(swapLocalePath(pathname, lang.code)); setLangExpanded(false) }}
+                        onClick={() => { pickLocale(lang.code); setLangExpanded(false) }}
                         className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-sm text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
                       >
                         <span className="font-medium">{lang.nativeName}</span>
