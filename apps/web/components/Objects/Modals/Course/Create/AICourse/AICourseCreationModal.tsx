@@ -20,6 +20,7 @@ import {
   parseCoursePlanFromStream,
   ENABLE_ACTIVITY_CONTENT_GENERATION,
 } from '@services/ai/courseplanning'
+import { useLocalizedPath } from '@components/Contexts/LocaleContext'
 
 interface AICourseCreationModalProps {
   isOpen: boolean
@@ -38,6 +39,7 @@ function AICourseCreationModal({
   orgslug: _orgslug,
   accessToken,
 }: AICourseCreationModalProps) {
+  const lp = useLocalizedPath()
   const { t, i18n } = useTranslation()
   const { track } = useLHAnalytics('dashboard')
   const router = useRouter()
@@ -180,7 +182,7 @@ function AICourseCreationModal({
     if (!courseUuid) return
     onClose()
     const courseId = courseUuid.replace('course_', '')
-    router.push(`/dash/courses/course/${courseId}/content`)
+    router.push(lp(`/dash/courses/course/${courseId}/content`))
   }
 
   if (typeof document === 'undefined') return null

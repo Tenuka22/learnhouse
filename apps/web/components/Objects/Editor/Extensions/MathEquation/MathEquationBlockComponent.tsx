@@ -6,7 +6,7 @@ const BlockMath = lazy(() => {
   return import('react-katex').then(m => ({ default: m.BlockMath }))
 })
 import { FloppyDisk, Sigma, ArrowSquareOut, CaretDown, BookOpen, Lightbulb } from '@phosphor-icons/react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { useTranslation } from 'react-i18next'
 
@@ -295,14 +295,14 @@ function MathEquationBlockComponent(props: any) {
                         <span className="font-medium">Integral:</span> \int_{'{'}lower{'}'}^{'{'}upper{'}'}
                       </div>
                       <div className="pt-2 border-t border-neutral-100">
-                        <Link
+                        <LocaleLink
                           className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
                           href="https://katex.org/docs/supported.html"
                           target="_blank"
                         >
                           {t('editor.blocks.math_block.view_reference')}
                           <ArrowSquareOut weight="duotone" size={10} className="ml-1" />
-                        </Link>
+                        </LocaleLink>
                       </div>
                     </div>
                   </div>
@@ -331,14 +331,14 @@ function MathEquationBlockComponent(props: any) {
             {/* Help Link */}
             <div className="flex items-center text-neutral-500 text-sm">
               <span>{t('editor.blocks.math_block.refer_to')}</span>
-              <Link
+              <LocaleLink
                 className="inline-flex items-center mx-1 text-blue-600 hover:text-blue-800 font-medium"
                 href="https://katex.org/docs/supported.html"
                 target="_blank"
               >
                 {t('editor.blocks.math_block.guide')}
                 <ArrowSquareOut weight="duotone" size={12} className="ml-1" />
-              </Link>
+              </LocaleLink>
               <span>{t('editor.blocks.math_block.for_functions')}</span>
             </div>
           </div>

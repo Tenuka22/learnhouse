@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -61,13 +61,13 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
               <p className="text-sm text-gray-500 mt-0.5">{community.description}</p>
             )}
           </div>
-          <Link
+          <LocaleLink
             href={getUriWithOrg(orgslug, `/community/${communityId}`)}
             className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
           >
             {t('communities.course_section.view_all')}
             <ArrowRight size={14} />
-          </Link>
+          </LocaleLink>
         </div>
 
         {/* Recent Discussions */}
@@ -76,12 +76,12 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
             <div className="p-6 text-center">
               <MessageCircle size={32} className="mx-auto text-gray-300 mb-2" />
               <p className="text-sm text-gray-500">{t('communities.course_section.no_discussions')}</p>
-              <Link
+              <LocaleLink
                 href={getUriWithOrg(orgslug, `/community/${communityId}`)}
                 className="inline-block mt-3 text-sm font-medium text-gray-700 hover:text-gray-900"
               >
                 {t('communities.course_section.start_first')}
-              </Link>
+              </LocaleLink>
             </div>
           ) : (
             discussions.map((discussion) => {
@@ -92,7 +92,7 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
                 : t('common.unknown')
 
               return (
-                <Link
+                <LocaleLink
                   key={discussion.discussion_uuid}
                   href={getUriWithOrg(orgslug, `/community/${communityId}/discussion/${discussionId}`)}
                   className="block p-4 hover:bg-gray-50 transition-colors"
@@ -113,7 +113,7 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
                       </p>
                     </div>
                   </div>
-                </Link>
+                </LocaleLink>
               )
             })
           )}

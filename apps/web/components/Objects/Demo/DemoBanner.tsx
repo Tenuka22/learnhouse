@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import { Sparkle } from '@phosphor-icons/react'
 
@@ -107,14 +107,14 @@ export default function DemoBanner() {
       {/* The hub only exists in multi-tenancy; on a single-org install /new is
           a 404, so the call to action is simply not offered there. */}
       {isMultiOrgModeEnabled() && (
-        <Link
+        <LocaleLink
           href="/new"
           className="ms-auto shrink-0 rounded-lg bg-amber-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800"
         >
           {t('demo.create_your_own', {
             defaultValue: 'Create your own organization',
           })}
-        </Link>
+        </LocaleLink>
       )}
     </div>
   )

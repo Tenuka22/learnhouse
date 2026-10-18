@@ -41,7 +41,7 @@ import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { getLinkExtension } from './EditorConf'
 import WebPreview from './Extensions/WebPreview/WebPreview'
@@ -472,10 +472,10 @@ function Editor(props: EditorProps) {
             />
             <div className="activity-editor-doc-section">
               <div className="activity-editor-info-wrapper">
-                <Link href="/">
+                <LocaleLink href="/">
                   <EditorLearnHouseLogo />
-                </Link>
-                <Link target="_blank" href={`/course/${course_uuid}`}>
+                </LocaleLink>
+                <LocaleLink target="_blank" href={`/course/${course_uuid}`}>
                   <img
                     className="activity-editor-info-thumbnail"
                     src={`${props.course.thumbnail_image ? getCourseThumbnailMediaDirectory(
@@ -485,7 +485,7 @@ function Editor(props: EditorProps) {
                     ) : getUriWithOrg(props.org?.slug, '/empty_thumbnail.png')}`}
                     alt={props.course.name}
                   />
-                </Link>
+                </LocaleLink>
                 <div className="activity-editor-doc-name">
                   {' '}
                   <b>{props.course.name}</b> <SlashIcon /> {props.activity.name}{' '}
@@ -636,14 +636,14 @@ function Editor(props: EditorProps) {
                   )}
                 </div>
                 <ToolTip content={t('editor.preview')}>
-                  <Link
+                  <LocaleLink
                     target="_blank"
                     href={`/course/${course_uuid}/activity/${activity_uuid}`}
                   >
                     <div className="flex bg-neutral-600 hover:bg-neutral-700 transition-all ease-linear h-9 px-3 py-2 font-black justify-center items-center text-sm shadow-sm text-neutral-100 rounded-lg hover:cursor-pointer">
                       <Eye className="mx-auto items-center" size={15} />
                     </div>
-                  </Link>
+                  </LocaleLink>
                 </ToolTip>
               </div>
               <DividerVerticalIcon

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Search, ArrowRight, Sparkles, BookCopy, Folder, ArrowUpRight, TextSearch, ScanSearch, Users } from 'lucide-react';
 import { searchOrgContent } from '@services/search/search';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Link from 'next/link';
+import LocaleLink from '@components/Utils/LocaleLink'
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -230,7 +230,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           </div>
           <div className="space-y-1">
             {searchTerms.map(({ term, type, icon }) => (
-              <Link
+              <LocaleLink
                 key={`${term}-${type}`}
                 href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(term)}`)}
                 className="flex items-center px-3 py-2 hover:bg-black/[0.02] rounded-lg transition-colors group"
@@ -240,7 +240,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <span className="text-sm text-black/70">{term}</span>
                 </div>
                 <ArrowUpRight size={14} className="text-black/30 group-hover:text-black/50 transition-colors" />
-              </Link>
+              </LocaleLink>
             ))}
           </div>
         </div>
@@ -271,7 +271,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <span>{t('courses.courses')}</span>
             </div>
             {searchResults.courses.map((course) => (
-              <Link
+              <LocaleLink
                 key={course.course_uuid}
                 href={getUriWithOrg(orgslug, `/course/${encodeURIComponent(removeCoursePrefix(course.course_uuid))}`)}
                 className="flex items-center gap-3 p-2 hover:bg-black/[0.02] rounded-lg transition-colors"
@@ -299,7 +299,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   </div>
                   <p className="text-xs text-black/50 truncate">{course.description}</p>
                 </div>
-              </Link>
+              </LocaleLink>
             ))}
           </div>
         )}
@@ -312,7 +312,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <span>{t('folders.folders')}</span>
             </div>
             {searchResults.folders.map((folder) => (
-              <Link
+              <LocaleLink
                 key={folder.folder_uuid}
                 href={getUriWithOrg(orgslug, `/library/folder/${encodeURIComponent(folder.folder_uuid.replace('folder_', ''))}`)}
                 className="flex items-center gap-3 p-2 hover:bg-black/[0.02] rounded-lg transition-colors"
@@ -327,7 +327,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   </div>
                   <p className="text-xs text-black/50 truncate">{folder.description}</p>
                 </div>
-              </Link>
+              </LocaleLink>
             ))}
           </div>
         )}
@@ -340,7 +340,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <span>{t('common.users')}</span>
             </div>
             {searchResults.users.map((user) => (
-              <Link
+              <LocaleLink
                 key={user.user_uuid}
                 href={getUriWithOrg(orgslug, `/user/${encodeURIComponent(user.username)}`)}
                 className="flex items-center gap-3 p-2 hover:bg-black/[0.02] rounded-lg transition-colors"
@@ -363,7 +363,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   </div>
                   <p className="text-xs text-black/50 truncate">@{user.username}</p>
                 </div>
-              </Link>
+              </LocaleLink>
             ))}
           </div>
         )}
@@ -416,13 +416,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                    searchResults.folders.length > 0 ||
                    searchResults.users.length > 0) ||
                    searchQuery.trim()) && (
-                  <Link
+                  <LocaleLink
                     href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`)}
                     className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 hover:text-black/70 hover:bg-black/[0.02] transition-colors"
                   >
                     <span>{t('search.view_all_results')}</span>
                     <ArrowRight size={14} />
-                  </Link>
+                  </LocaleLink>
                 )}
               </>
             )}

@@ -3,6 +3,18 @@ import Image from 'next/image'
 import Link from 'next/link'
 import learnhouseIcon from 'public/black_logo.png'
 
+/**
+ * The root 404 boundary. Deliberately uses plain `next/link` and the
+ * locale-less `/`, unlike the rest of the app:
+ *
+ *   - It also catches requests that never resolved a locale (an unsupported
+ *     prefix, a malformed URL), so no locale is guaranteed to exist here.
+ *   - middleware redirects `/` to `/{detected}`, which lands the visitor on the
+ *     homepage in the right language.
+ *
+ * `app/[locale]/not-found.tsx` is the boundary for a 404 *inside* a known
+ * locale; that one does use LocaleLink, because the locale is known there.
+ */
 export default function NotFound() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center 

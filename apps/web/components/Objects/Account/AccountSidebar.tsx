@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import { User, Lock, ShoppingBag, Settings } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -61,7 +61,7 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
               const Icon = item.icon
               const isActive = currentSubpage === item.id
               return (
-                <Link
+                <LocaleLink
                   key={item.id}
                   href={getUriWithOrg(orgslug, `/account/${item.id}`)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
@@ -72,7 +72,7 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
                 >
                   <Icon size={18} className={isActive ? 'text-white' : 'text-gray-500'} />
                   <span className="text-sm font-medium">{t(item.labelKey)}</span>
-                </Link>
+                </LocaleLink>
               )
             })}
           </nav>

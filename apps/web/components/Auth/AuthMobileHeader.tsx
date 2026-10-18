@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
 import { getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import OrgSquareLogo from '@components/Objects/Org/OrgSquareLogo'
@@ -59,7 +59,7 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
         <div className="absolute inset-0 bg-black/30" />
       )}
 
-      <Link prefetch href={getUriWithOrg(org?.slug, '/')} className="relative z-10">
+      <LocaleLink prefetch href={getUriWithOrg(org?.slug, '/')} className="relative z-10">
         <div className="w-10 h-10 rounded-lg ring-1 ring-inset ring-white/10 bg-white flex items-center justify-center overflow-hidden shrink-0">
           <OrgSquareLogo
             org={org}
@@ -76,7 +76,7 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
             }
           />
         </div>
-      </Link>
+      </LocaleLink>
 
       <span className="relative z-10 font-semibold text-white text-lg truncate">
         {org?.name || 'LearnHouse'}

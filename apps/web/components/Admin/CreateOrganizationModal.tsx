@@ -6,6 +6,7 @@ import { queryKeys } from '@/lib/query/keys'
 import { getAPIUrl, getDeploymentMode } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { X, Buildings } from '@phosphor-icons/react'
+import { useLocalizedPath } from '@components/Contexts/LocaleContext'
 
 function slugify(s: string): string {
   return s
@@ -23,6 +24,7 @@ export default function CreateOrganizationModal({
   open: boolean
   onClose: () => void
 }) {
+  const lp = useLocalizedPath()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
@@ -86,7 +88,7 @@ export default function CreateOrganizationModal({
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.superadmin.orgs() })
       onClose()
-      if (data?.id) router.push(`/admin/organizations/${data.id}`)
+      if (data?.id) router.push(lp(`/admin/organizations/${data.id}`))
     } catch {
       setError('Network error')
     } finally {

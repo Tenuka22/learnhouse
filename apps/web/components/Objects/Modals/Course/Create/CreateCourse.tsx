@@ -26,6 +26,7 @@ import FormTagInput from "@components/Objects/StyledElements/Form/TagInput"
 import { useTranslation } from "react-i18next"
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useUpgradeModal } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
+import { useLocalizedPath } from '@components/Contexts/LocaleContext'
 
 const _validationSchema = Yup.object().shape({
   name: Yup.string()
@@ -40,6 +41,7 @@ const _validationSchema = Yup.object().shape({
 })
 
 function CreateCourseModal({ closeModal, orgslug }: any) {
+  const lp = useLocalizedPath()
   const { t } = useTranslation()
   const { track } = useLHAnalytics('dashboard')
   const router = useRouter()
@@ -129,7 +131,7 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
           // popup so a brand-new course lands the teacher on the core creation
           // action (their first activity) instead of an empty settings page.
           const courseId = res.data.course_uuid?.replace('course_', '') || res.data.course_uuid
-          router.push(`/dash/courses/course/${courseId}/content?new_activity=1`)
+          router.push(lp(`/dash/courses/course/${courseId}/content?new_activity=1`))
         } else {
           toast.dismiss(toast_loading)
           const detail = typeof res.data?.detail === 'string' ? res.data.detail : ''

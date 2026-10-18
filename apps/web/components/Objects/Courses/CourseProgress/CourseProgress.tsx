@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Check, Square, ArrowRight, Folder, FileText, Video, Layers, BookOpenCheck, Package, Puzzle, Globe } from 'lucide-react'
 import { MarkdownLogo } from '@phosphor-icons/react'
 import { getUriWithOrg } from '@services/config/config'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 
 interface CourseProgressProps {
@@ -82,7 +82,7 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
               const activityId = activity.activity_uuid.replace('activity_', '')
               const courseId = course.course_uuid.replace('course_', '')
               return (
-                <Link
+                <LocaleLink
                   key={activity.activity_uuid}
                   href={getUriWithOrg(orgslug, '') + `/course/${courseId}/activity/${activityId}`}
                 >
@@ -105,7 +105,7 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
                     </div>
                     <ArrowRight size={16} className="text-gray-400 group-hover:text-gray-600" />
                   </div>
-                </Link>
+                </LocaleLink>
               )
             })}
           </div>

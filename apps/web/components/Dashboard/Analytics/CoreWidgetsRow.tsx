@@ -4,7 +4,7 @@ import { safeHref, safeImageSrc } from '@services/security/url'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import {
   Funnel,
   Trophy,
@@ -327,7 +327,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                 : `/dash/courses`
 
               return (
-                <Link
+                <LocaleLink
                   key={i}
                   href={safeHref(href)}
                   className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 items-center px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group"
@@ -366,7 +366,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                       {rate}%
                     </span>
                   </span>
-                </Link>
+                </LocaleLink>
               )
             })}
           </div>
@@ -411,7 +411,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                 cleanCourseUuid && cleanActivityUuid
                   ? `/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`
                   : null
-              const Wrapper = activityHref ? Link : 'div'
+              const Wrapper = activityHref ? LocaleLink : 'div'
               const wrapperProps = activityHref ? { href: safeHref(activityHref) } : {}
               const avgTime = row.avg_seconds_spent
                 ? row.avg_seconds_spent >= 60
@@ -473,7 +473,7 @@ function CourseRow({ row, org }: { row: any; org: any }) {
     : `/dash/courses`
 
   return (
-    <Link
+    <LocaleLink
       href={safeHref(href)}
       className="flex items-center gap-3 p-2 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer"
     >
@@ -503,7 +503,7 @@ function CourseRow({ row, org }: { row: any; org: any }) {
           </span>
         </div>
       </div>
-    </Link>
+    </LocaleLink>
   )
 }
 
@@ -520,7 +520,7 @@ function ActivityRow({ row }: { row: any }) {
     cleanCourseUuid && cleanActivityUuid
       ? `/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`
       : null
-  const Wrapper = activityHref ? Link : 'div'
+  const Wrapper = activityHref ? LocaleLink : 'div'
   const wrapperProps = activityHref ? { href: safeHref(activityHref) } : {}
 
   return (

@@ -1,13 +1,19 @@
 /**
  * Text direction: the single source of truth.
  *
- * Deliberately dependency-free: `app/global-error.tsx` renders outside every
- * provider (no i18n, no router) and still needs to import from here.
+ * Nearly dependency-free: `app/global-error.tsx` renders outside every provider
+ * (no i18n, no router) and still needs to import from here, so this module may
+ * only reach for lib/locale-registry.ts, which is itself free of imports. The
+ * registry import is a runtime cycle in appearance only — locale-registry's own
+ * reference to `Direction` is `import type`, so it is erased before the module
+ * graph is built.
  *
  * The RTL language set is duplicated in `public/dir-init.js`, which runs before
  * any bundle loads and therefore cannot import this module. `tests/rtl-guard`
  * asserts the two stay in sync.
  */
+
+import { AVAILABLE_LANGUAGES } from './locale-registry'
 
 export type Direction = 'ltr' | 'rtl'
 
@@ -44,6 +50,24 @@ export function dirMultiplier(dir: Direction): 1 | -1 {
   return dir === 'rtl' ? -1 : 1
 }
 
+const SUPPORTED_LOCALE_CODES = new Set(
+  AVAILABLE_LANGUAGES.map((language) => language.code)
+)
+
+/**
+ * The locale segment of a locale-prefixed pathname, or '' when there isn't one.
+ *
+ * Lives here rather than in lib/locale.ts because this module has to stay
+ * dependency-free (see the note at the top) and public/dir-init.js needs the
+ * same answer before any bundle loads. `/api` and `/embed` keep their original
+ * URLs by contract, so their first segment is never a locale.
+ */
+export function detectPathLocale(pathname: string): string {
+  const first = String(pathname || '').split('/')[1]
+  if (!first || first === 'api' || first === 'embed') return ''
+  return SUPPORTED_LOCALE_CODES.has(first) ? first : ''
+}
+
 /**
  * Detect the language the same way i18next's LanguageDetector does, in the same
  * order (see `detection.order` in lib/i18n.ts). Client-only; returns 'en' on
@@ -53,6 +77,11 @@ export function dirMultiplier(dir: Direction): 1 | -1 {
  */
 export function detectClientLanguage(): string {
   if (typeof window === 'undefined') return 'en'
+
+  // The URL prefix wins: it is the one signal that travels with a shared link
+  // or a bookmark, so honour it ahead of this browser's stored preference.
+  const fromPath = detectPathLocale(window.location.pathname)
+  if (fromPath) return fromPath
 
   try {
     const stored = window.localStorage.getItem('i18nextLng')

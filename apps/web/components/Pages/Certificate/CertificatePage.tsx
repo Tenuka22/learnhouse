@@ -7,7 +7,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUserCertificates } from '@services/courses/certifications';
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { ArrowLeft, Download, Share2, Copy, Check } from 'lucide-react';
-import Link from 'next/link';
+import LocaleLink from '@components/Utils/LocaleLink'
 import { getUriWithOrg } from '@services/config/config';
 import { useLHAnalytics, useTrackView, AnalyticsEvent } from '@services/analytics';
 import {
@@ -199,13 +199,13 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-red-800 mb-2">Certificate Not Available</h2>
             <p className="text-red-600 mb-4">{error}</p>
-            <Link
+            <LocaleLink
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
               className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Course</span>
-            </Link>
+            </LocaleLink>
           </div>
         </div>
       </div>
@@ -221,13 +221,13 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <p className="text-yellow-600 mb-4">
               No certificate is available for this course. Please contact your instructor for more information.
             </p>
-            <Link
+            <LocaleLink
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
               className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Course</span>
-            </Link>
+            </LocaleLink>
           </div>
         </div>
       </div>
@@ -239,13 +239,13 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Link
+          <LocaleLink
             href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
             className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition duration-200"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Course</span>
-          </Link>
+          </LocaleLink>
           
           <div className="flex items-center space-x-3">
             <button

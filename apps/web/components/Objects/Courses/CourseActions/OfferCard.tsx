@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { ArrowRight, RefreshCcw, SquareCheck, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
@@ -91,7 +91,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
         )}
 
         {/* CTA */}
-        <Link
+        <LocaleLink
           href={getUriWithOrg(orgslug, `/store/offers/${offer.offer_uuid}`)}
           onClick={() => track(AnalyticsEvent.CourseOfferCtaClicked, {
             offer_uuid: offer.offer_uuid,
@@ -108,7 +108,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
             {isSubscription ? 'Subscribe now' : 'Get access'}
             <ArrowRight size={13} />
           </div>
-        </Link>
+        </LocaleLink>
       </div>
     </div>
   )

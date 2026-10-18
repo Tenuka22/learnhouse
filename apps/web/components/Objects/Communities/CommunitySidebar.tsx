@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import {
   MessageCircle,
@@ -133,7 +133,7 @@ export function CommunitySidebar({
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
               {t('communities.linked_course')}
             </div>
-            <Link
+            <LocaleLink
               href={getUriWithOrg(orgslug, `/course/${linkedCourse.course_uuid.replace('course_', '')}`)}
               className="group block"
             >
@@ -161,7 +161,7 @@ export function CommunitySidebar({
                 </div>
                 <ChevronRight size={16} className="text-gray-400 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
               </div>
-            </Link>
+            </LocaleLink>
           </div>
         )}
 
@@ -178,13 +178,13 @@ export function CommunitySidebar({
           )}
 
           {canManageCommunity && (
-            <Link
+            <LocaleLink
               href={getUriWithOrg(orgslug, '/dash/communities')}
               className="w-full bg-white text-neutral-600 border border-neutral-200 py-2.5 rounded-lg font-medium hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
               <Settings className="w-4 h-4" />
               {t('communities.manage')}
-            </Link>
+            </LocaleLink>
           )}
         </div>
       </div>

@@ -13,7 +13,7 @@ import { getUserGroups, linkResourcesToUserGroup, unLinkResourcesToUserGroup } f
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import toast from 'react-hot-toast'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 
 interface BoardAccessTabProps {
@@ -275,13 +275,13 @@ function LinkUserGroupToBoard({ boardUuid, orgId, accessToken, setModalOpen }: {
             <span className="px-3 text-yellow-700 font-bold rounded-full py-1 mx-3">
               {t('boards.access.no_user_groups_available')}
             </span>
-            <Link
+            <LocaleLink
               className="px-3 text-blue-700 font-bold rounded-full py-1 bg-blue-100 mx-1"
               target="_blank"
               href={getUriWithOrg(org?.slug, '/dash/users/settings/usergroups')}
             >
               {t('boards.access.create_user_group')}
-            </Link>
+            </LocaleLink>
           </div>
         )}
         <div className="py-3">

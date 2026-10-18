@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { Plus, Settings, MessageCircle } from 'lucide-react'
 import { Community } from '@services/communities/communities'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
@@ -39,13 +39,13 @@ export function CommunityActionsMobile({
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             {canManageCommunity && (
-              <Link
+              <LocaleLink
                 href={getUriWithOrg(orgslug, '/dash/communities')}
                 className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 aria-label="Manage community"
               >
                 <Settings size={16} className="text-gray-600" />
-              </Link>
+              </LocaleLink>
             )}
             {canCreateDiscussion && onCreateDiscussion && (
               <button

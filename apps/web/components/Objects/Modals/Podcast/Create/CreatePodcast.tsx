@@ -1,5 +1,6 @@
 'use client'
 import { Input } from "@components/ui/input"
+import { useLocalizedPath } from '@components/Contexts/LocaleContext'
 import { Textarea } from "@components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
 import FormLayout, {
@@ -27,6 +28,7 @@ import FormTagInput from "@components/Objects/StyledElements/Form/TagInput"
 import { useTranslation } from "react-i18next"
 
 function CreatePodcastModal({ closeModal, orgslug }: any) {
+  const lp = useLocalizedPath()
   const { t } = useTranslation()
   const router = useRouter()
   const session = useLHSession() as any
@@ -86,7 +88,7 @@ function CreatePodcastModal({ closeModal, orgslug }: any) {
           closeModal()
           // Redirect to the podcast dashboard
           const podcastId = res.data.podcast_uuid?.replace('podcast_', '') || res.data.podcast_uuid
-          router.push(`/dash/podcasts/podcast/${podcastId}/general`)
+          router.push(lp(`/dash/podcasts/podcast/${podcastId}/general`))
         } else {
           toast.dismiss(toast_loading)
           // Podcasts are gated on the free plan → offer an upgrade at the

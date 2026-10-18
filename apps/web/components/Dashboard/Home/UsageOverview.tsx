@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import {
@@ -251,12 +251,12 @@ export default function UsageOverview() {
                 </span>
               </div>
               {feature.enabled ? (
-                <Link href={feature.href}>
+                <LocaleLink href={feature.href}>
                   <ArrowRight
                     size={12}
                     className="text-gray-300 hover:text-gray-500 transition-colors" data-dir-flip
                   />
-                </Link>
+                </LocaleLink>
               ) : (
                 <span className="text-[10px] text-gray-300">{t('dashboard.home.off')}</span>
               )}

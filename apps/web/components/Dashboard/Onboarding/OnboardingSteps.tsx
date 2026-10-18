@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useOnboarding } from '@components/Hooks/useOnboarding'
 import {
   BookOpen,
@@ -191,14 +191,14 @@ export default function OnboardingSteps() {
                                 <ArrowUpRight size={14} weight="bold" data-dir-flip />
                               </a>
                             ) : (
-                              <Link
+                              <LocaleLink
                                 href={target}
                                 onClick={() => track(AnalyticsEvent.OnboardingStepActionClicked, { step_id: step.id })}
                                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
                               >
                                 {t(`onboarding.steps.${step.id}.action`, { defaultValue: step.action })}
                                 <ArrowRight size={14} weight="bold" data-dir-flip />
-                              </Link>
+                              </LocaleLink>
                             )}
                           </div>
                         </div>

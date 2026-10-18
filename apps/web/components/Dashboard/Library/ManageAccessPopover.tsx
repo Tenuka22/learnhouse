@@ -13,7 +13,7 @@ import { updateMedia, getMediaById } from '@services/media/media-resource'
 import { updateCourse, getCourse } from '@services/courses/courses'
 import { apiFetch } from '@services/utils/ts/requests'
 import { Check, Globe, Info, SquareUserRound, Users, X } from 'lucide-react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import React, { useEffect, useState } from 'react'
@@ -159,13 +159,13 @@ function LinkUserGroup({
             <span className="px-3 text-yellow-700 font-bold rounded-full py-1 mx-3">
               {t('access.usergroups.no_usergroups')}
             </span>
-            <Link
+            <LocaleLink
               className="px-3 text-blue-700 font-bold rounded-full py-1 bg-blue-100 mx-1"
               target="_blank"
               href={getUriWithOrg(org.slug, '/dash/users/settings/usergroups')}
             >
               {t('access.usergroups.create_usergroup')}
-            </Link>
+            </LocaleLink>
           </div>
         )}
         <div className="py-3">

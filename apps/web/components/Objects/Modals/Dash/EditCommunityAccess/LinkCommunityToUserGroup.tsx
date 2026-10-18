@@ -5,7 +5,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { getUserGroups, linkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import { Info } from 'lucide-react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -95,13 +95,13 @@ function LinkCommunityToUserGroup(props: LinkCommunityToUserGroupProps) {
             <span className="px-3 text-yellow-700 font-bold rounded-full py-1 mx-3">
               {t('dashboard.courses.communities.access.usergroups.modals.no_usergroups')}{' '}
             </span>
-            <Link
+            <LocaleLink
               className="px-3 text-blue-700 font-bold rounded-full py-1 bg-blue-100 mx-1"
               target="_blank"
               href={getUriWithOrg(org.slug, '/dash/users/settings/usergroups')}
             >
               {t('dashboard.courses.communities.access.usergroups.modals.create_usergroup')}
-            </Link>
+            </LocaleLink>
           </div>
         )}
         <div className="py-3">

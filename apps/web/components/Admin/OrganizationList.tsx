@@ -7,7 +7,7 @@ import { getAPIUrl, getDeploymentMode } from '@services/config/config'
 import { getOrgLogoMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
 import { apiFetch } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Buildings, Globe, User, CaretLeft, CaretRight, BookOpen, MagnifyingGlass, ArrowSquareOut, Plus } from '@phosphor-icons/react'
 import CreateOrganizationModal from '@components/Admin/CreateOrganizationModal'
@@ -449,7 +449,7 @@ export default function OrganizationList() {
             return (
               <tr key={org.id} className="border-b border-white/[0.05] hover:bg-white/[0.03] transition-colors">
                 <td className="px-4 py-3">
-                  <Link href={`/admin/organizations/${org.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                  <LocaleLink href={`/admin/organizations/${org.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     {org.logo_image ? (
                       <ImgWithFallback
                         src={getLogoUrl(org.org_uuid, org.logo_image)}
@@ -468,7 +468,7 @@ export default function OrganizationList() {
                         <p data-ltr-content className="text-xs text-white/40 font-mono">{org.slug}</p>
                       )}
                     </div>
-                  </Link>
+                  </LocaleLink>
                 </td>
                 <td className="px-4 py-3">
                   <div className="space-y-1">

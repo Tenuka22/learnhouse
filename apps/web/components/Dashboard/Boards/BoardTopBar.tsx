@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
@@ -31,14 +31,14 @@ export default function BoardTopBar({
         }}
       >
         <ToolTip content={t('boards.back_to_boards')}>
-          <Link href={getUriWithOrg(orgslug, '/boards')}>
+          <LocaleLink href={getUriWithOrg(orgslug, '/boards')}>
             <div className="editor-tool-btn">
               <ArrowLeft size={15} />
             </div>
-          </Link>
+          </LocaleLink>
         </ToolTip>
 
-        <Link href={getUriWithOrg(orgslug, '/boards')}>
+        <LocaleLink href={getUriWithOrg(orgslug, '/boards')}>
           <div className="bg-black rounded-md w-[25px] h-[25px] flex items-center justify-center hover:opacity-80 transition-opacity">
             <Image
               src="/lrn.svg"
@@ -48,7 +48,7 @@ export default function BoardTopBar({
               className="invert"
             />
           </div>
-        </Link>
+        </LocaleLink>
 
         <span className="text-sm font-bold text-neutral-800 truncate max-w-[220px]">
           {boardName}

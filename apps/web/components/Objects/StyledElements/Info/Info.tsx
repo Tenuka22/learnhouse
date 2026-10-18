@@ -1,7 +1,7 @@
 'use client'
 import { getUriWithoutOrg } from '@services/config/config'
 import { Diamond, Home, PersonStanding } from 'lucide-react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React from 'react'
 
 function InfoUI(params: { message?: string, submessage?: string, cta?: string, href: string }) {
@@ -15,20 +15,20 @@ function InfoUI(params: { message?: string, submessage?: string, cta?: string, h
                 </div>
             </div>
             {params.cta && <div className='flex space-x-4'>
-                <Link
+                <LocaleLink
                     href={params.href}
                     className="flex space-x-2 items-center rounded-full px-4 py-1 text-yellow-200 bg-yellow-700 hover:bg-yellow-800 transition-all ease-linear shadow-lg "
                 >
                     <PersonStanding className="text-yellow-200" size={17} />
                     <span className="text-md font-bold">{params.cta}</span>
-                </Link>
-                <Link
+                </LocaleLink>
+                <LocaleLink
                     href={getUriWithoutOrg('/home')}
                     className="flex space-x-2 items-center rounded-full px-4 py-1 text-gray-200 bg-gray-700 hover:bg-gray-800 transition-all ease-linear shadow-lg "
                 >
                     <Home className="text-gray-200" size={17} />
                     <span className="text-md font-bold">Home</span>
-                </Link>
+                </LocaleLink>
             </div>}
         </div>
     )

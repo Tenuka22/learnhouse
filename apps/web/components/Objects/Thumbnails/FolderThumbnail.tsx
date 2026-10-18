@@ -12,7 +12,7 @@ import { getFolderThumbnailMediaDirectory } from '@services/media/media'
 import { folderTone } from '@components/Dashboard/Library/LibraryToolbar'
 import { shareFolderLink } from '@components/Dashboard/Library/shareFolder'
 import { FolderSimple, DotsThreeVertical, ArrowSquareOut, PencilSimple, Trash, Lock, LinkSimple } from '@phosphor-icons/react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React from 'react'
 import toast from 'react-hot-toast'
 import {
@@ -78,9 +78,9 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuItem asChild>
-                  <Link prefetch={false} href={folderLink} className="flex items-center cursor-pointer">
+                  <LocaleLink prefetch={false} href={folderLink} className="flex items-center cursor-pointer">
                     <ArrowSquareOut className="me-2 h-4 w-4" /> {t('library.open')}
-                  </Link>
+                  </LocaleLink>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <button
@@ -120,7 +120,7 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
         </AuthenticatedClientElement>
       )}
 
-      <Link prefetch={false} href={folderLink} className="flex items-center gap-3 pe-6">
+      <LocaleLink prefetch={false} href={folderLink} className="flex items-center gap-3 pe-6">
         {thumb ? (
           <div
             className="w-10 h-10 rounded-lg bg-cover bg-center flex-shrink-0 ring-1 ring-inset ring-black/5"
@@ -137,7 +137,7 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
             {itemCount} {t('library.items')}
           </span>
         </div>
-      </Link>
+      </LocaleLink>
 
       <Modal
         isDialogOpen={editOpen}

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { motion, type Transition, type TargetAndTransition } from 'motion/react'
 import {
   ArrowLeft,
@@ -284,20 +284,20 @@ export default function PlaygroundEditor({
         }}
       >
         {/* Logo */}
-        <Link href="/">
+        <LocaleLink href="/">
           <EditorLearnHouseLogo />
-        </Link>
+        </LocaleLink>
 
         <SlashIcon style={{ color: '#d1d5db', flexShrink: 0 }} />
 
         {/* Back */}
-        <Link
+        <LocaleLink
           href="/playgrounds"
           className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-700 transition-colors flex-shrink-0 font-medium"
         >
           <ArrowLeft size={14} weight="bold" data-dir-flip />
           <span>Playgrounds</span>
-        </Link>
+        </LocaleLink>
 
         <SlashIcon style={{ color: '#d1d5db', flexShrink: 0 }} />
 
@@ -392,7 +392,7 @@ export default function PlaygroundEditor({
           </button>
 
           {/* Preview */}
-          <Link
+          <LocaleLink
             href={`/playground/${playground.playground_uuid}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -400,7 +400,7 @@ export default function PlaygroundEditor({
           >
             <ArrowSquareOut size={14} weight="bold" />
             Preview
-          </Link>
+          </LocaleLink>
         </div>
       </div>
 

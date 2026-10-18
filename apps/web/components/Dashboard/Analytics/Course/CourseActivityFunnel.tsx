@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { getUriWithOrg } from '@services/config/config'
@@ -46,13 +46,13 @@ function FunnelStep({
         </div>
         <div className="flex-1 pb-5 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <Link
+            <LocaleLink
               href={href}
               className="text-sm font-semibold text-gray-800 truncate hover:text-indigo-600 hover:underline transition-colors"
               title={`${row.chapterName ? row.chapterName + ': ' : ''}${row.displayName}`}
             >
               {row.displayName}
-            </Link>
+            </LocaleLink>
             {row.chapterName && (
               <span className="text-[10px] text-gray-300 shrink-0">{row.chapterName}</span>
             )}

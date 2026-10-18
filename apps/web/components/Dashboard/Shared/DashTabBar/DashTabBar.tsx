@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef, useState, useCallback, useEffect } from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { PlanLevel } from '@services/plans/plans'
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
@@ -132,11 +132,11 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
 
           if (tab.href) {
             return (
-              <Link key={tab.key} href={tab.href} prefetch={false}>
+              <LocaleLink key={tab.key} href={tab.href} prefetch={false}>
                 <div className={tabClass} {...(tab.active ? { 'data-tab-active': '' } : {})}>
                   {inner}
                 </div>
-              </Link>
+              </LocaleLink>
             )
           }
 

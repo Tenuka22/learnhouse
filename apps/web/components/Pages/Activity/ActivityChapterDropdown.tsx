@@ -3,7 +3,7 @@ import { useMediaQuery } from 'usehooks-ts'
 import { Check, FileText, ListTree, Video, X, StickyNote, Backpack, ArrowRight, Package, Puzzle, Globe } from 'lucide-react'
 import { MarkdownLogo } from '@phosphor-icons/react'
 import { getUriWithOrg } from '@services/config/config'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -153,7 +153,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                     );
                     
                     return (
-                      <Link
+                      <LocaleLink
                         key={activity.id}
                         href={getUriWithOrg(props.orgslug, '') + `/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
                         prefetch={false}
@@ -199,7 +199,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                             </div>
                           </div>
                         </div>
-                      </Link>
+                      </LocaleLink>
                     );
                   })}
                 </div>

@@ -10,7 +10,7 @@ import { resourceHref, safeExternalUrl } from '@components/Dashboard/Library/res
 import { shareMediaLink } from '@components/Dashboard/Library/shareFolder'
 import { getMediaFileDirectory } from '@services/media/media-resource'
 import { mediaKind } from '@/lib/media/mediaKind'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import {
   MicrophoneStage,
   ChatsCircle,
@@ -223,9 +223,9 @@ export default function LibraryItemCard({ item, orgslug, onRemove }: Props) {
           {body}
         </button>
       ) : internalHref ? (
-        <Link href={internalHref} className="block">
+        <LocaleLink href={internalHref} className="block">
           {body}
-        </Link>
+        </LocaleLink>
       ) : (
         <div>{body}</div>
       )}

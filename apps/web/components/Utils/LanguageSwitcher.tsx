@@ -1,10 +1,12 @@
 'use client'
 
 import React from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { Languages, ChevronDown, Check } from 'lucide-react'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { changeLanguage } from '@/lib/i18n'
+import { swapLocalePath } from '@/lib/locale'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import {
   DropdownMenu,
@@ -18,10 +20,40 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
   const { i18n } = useTranslation()
   const { track } = useLHAnalytics()
   const colors = getMenuColorClasses(primaryColor)
+  const pathname = usePathname()
+  const router = useRouter()
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
 
   const currentLangCode = mounted ? i18n.language.split('-')[0].toUpperCase() : ''
+
+  /**
+   * Picking a language navigates as well as translating.
+   *
+   * The URL is the thing people share, bookmark and come back to, so it has to
+   * agree with the language on screen. `swapLocalePath` keeps the visitor on the
+   * same page and only moves the prefix; middleware already redirects the
+   * language-less form, but navigating client-side avoids a full page load and
+   * keeps the change feeling instantaneous.
+   *
+   * The two unprefixed surfaces (`/api`, `/embed`) are returned untouched, so
+   * switching language from inside an embed is a no-op rather than a dead link.
+   */
+  const selectLanguage = (code: string) => {
+    try {
+      localStorage.setItem('i18nextLng_userPicked', '1')
+    } catch { /* private mode */ }
+
+    track(AnalyticsEvent.LanguageChanged, {
+      language_code: code,
+      source: 'language_switcher',
+    })
+
+    changeLanguage(code)
+
+    const next = swapLocalePath(pathname, code)
+    if (next !== pathname) router.push(next)
+  }
 
   return (
     <DropdownMenu>
@@ -41,16 +73,7 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
           <DropdownMenuItem
             key={language.code}
             className="flex items-center justify-between cursor-pointer"
-            onClick={() => {
-              try {
-                localStorage.setItem('i18nextLng_userPicked', '1')
-              } catch { /* ignore */ }
-              track(AnalyticsEvent.LanguageChanged, {
-                language_code: language.code,
-                source: 'language_switcher',
-              })
-              changeLanguage(language.code)
-            }}
+            onClick={() => selectLanguage(language.code)}
           >
             <span className="flex items-center space-x-2">
               <span className="text-xs font-mono text-gray-400 w-5">{language.code.toUpperCase()}</span>
@@ -65,4 +88,3 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
 }
 
 export default LanguageSwitcher
-

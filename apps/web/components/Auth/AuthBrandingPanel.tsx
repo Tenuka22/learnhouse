@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
 import { getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import OrgSquareLogo from '@components/Objects/Org/OrgSquareLogo'
@@ -146,7 +146,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
               and for the no-org apex panel (platform shows no logo on the image). */}
           {!isEnterprise && !noOrg && (
             <div className="login-topbar">
-              <Link prefetch href="https://learnhouse.app" target="_blank">
+              <LocaleLink prefetch href="https://learnhouse.app" target="_blank">
                 <img
                   src="/lrn.svg"
                   alt="LearnHouse"
@@ -157,7 +157,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                     text_color === 'light' ? "opacity-60 invert" : "opacity-40"
                   )}
                 />
-              </Link>
+              </LocaleLink>
             </div>
           )}
 
@@ -181,7 +181,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                   text_color === 'light' ? "text-white" : "text-gray-900"
                 )}>
                   {/* Organization logo */}
-                  <Link prefetch href={getUriWithOrg(org?.slug, '/')}>
+                  <LocaleLink prefetch href={getUriWithOrg(org?.slug, '/')}>
                     <div className="w-24 h-24 rounded-2xl ring-1 ring-inset ring-white/10 bg-white flex items-center justify-center overflow-hidden">
                       <OrgSquareLogo
                         org={org}
@@ -198,7 +198,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                         }
                       />
                     </div>
-                  </Link>
+                  </LocaleLink>
 
                   {/* Text content */}
                   <div className="space-y-1">

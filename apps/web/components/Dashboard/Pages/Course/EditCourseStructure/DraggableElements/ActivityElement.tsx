@@ -35,7 +35,7 @@ import {
 } from 'lucide-react'
 import { MarkdownLogo, Globe as GlobePhosphor, Cube } from '@phosphor-icons/react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { Draggable } from '@hello-pangea/dnd'
@@ -440,24 +440,24 @@ function ActivityElement(props: ActivitiyElementProps) {
                     : t('dashboard.courses.structure.actions.edit_page')}
                   side="top"
                 >
-                  <Link
+                  <LocaleLink
                     href={editHref}
                     target="_blank"
                     className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
                   >
                     <FilePenLine size={15} />
-                  </Link>
+                  </LocaleLink>
                 </ToolTip>
               ) : (
                 <div className="h-7 w-7" />
               )}
               <ToolTip content={t('dashboard.courses.structure.actions.preview_activity')} side="top">
-                <Link
+                <LocaleLink
                   href={previewHref}
                   className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
                 >
                   <Eye size={15} />
-                </Link>
+                </LocaleLink>
               </ToolTip>
               <LockPopover
                 lockType={(props.activity.lock_type as LockType) || 'public'}

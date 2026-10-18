@@ -10,7 +10,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { MoreVertical, Users, Trash2, Edit, MessageCircle, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -58,7 +58,7 @@ function CommunityCard(props: PropsType) {
         />
       )}
 
-      <Link
+      <LocaleLink
         href={communityLink}
         className="block relative aspect-video overflow-hidden bg-gray-50"
       >
@@ -77,15 +77,15 @@ function CommunityCard(props: PropsType) {
             <Users size={40} strokeWidth={1.5} />
           </div>
         )}
-      </Link>
+      </LocaleLink>
 
       <div className="p-3 flex flex-col space-y-1.5">
-        <Link
+        <LocaleLink
           href={communityLink}
           className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
         >
           {props.community.name}
-        </Link>
+        </LocaleLink>
 
         {props.community.description && (
           <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
@@ -102,19 +102,19 @@ function CommunityCard(props: PropsType) {
           </div>
 
           {variant === 'dashboard' ? (
-            <Link
+            <LocaleLink
               href={getUriWithOrg(props.orgslug, `/dash/communities/${communityId}/general`)}
               className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
             >
               {t('dashboard.courses.communities.card.open_settings')}
-            </Link>
+            </LocaleLink>
           ) : (
-            <Link
+            <LocaleLink
               href={communityLink}
               className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
             >
               {t('dashboard.courses.communities.card.view_community')}
-            </Link>
+            </LocaleLink>
           )}
         </div>
       </div>
@@ -152,12 +152,12 @@ const CommunityAdminEditsArea = (props: any) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem asChild>
-              <Link
+              <LocaleLink
                 href={getUriWithOrg(props.orgslug, `/dash/communities/${removeCommunityPrefix(props.community_uuid)}/general`)}
                 className="flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
               >
                 <ExternalLink className="me-2 h-4 w-4" /> {t('dashboard.courses.communities.card.open_settings')}
-              </Link>
+              </LocaleLink>
             </DropdownMenuItem>
             {props.onEdit && (
               <DropdownMenuItem asChild>

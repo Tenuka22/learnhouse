@@ -1,5 +1,5 @@
 'use client'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React, { ReactNode } from 'react'
 
 export interface BreadcrumbItem {
@@ -44,7 +44,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
               )}
               <li className="flex items-center h-8">
                 {item.href && !isLast ? (
-                  <Link
+                  <LocaleLink
                     href={item.href}
                     className={`flex items-center h-full text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
                       isFirst && item.icon ? 'gap-1.5 px-2.5' : 'px-2.5'
@@ -52,7 +52,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
                   >
                     {item.icon}
                     <span className="truncate max-w-[150px]">{item.label}</span>
-                  </Link>
+                  </LocaleLink>
                 ) : (
                   <span className={`flex items-center h-full text-gray-900 ${
                     isFirst && item.icon ? 'gap-1.5 px-2.5' : 'px-2.5'

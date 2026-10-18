@@ -7,7 +7,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUserCertificates } from '@services/courses/certifications'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -95,7 +95,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
       style={{ boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)' }}
       onMouseEnter={handleMouseEnter}
     >
-      <Link href={getUriWithOrg(props.orgslug, '/course/' + courseid)}>
+      <LocaleLink href={getUriWithOrg(props.orgslug, '/course/' + courseid)}>
         <div
           className="course_tumbnail inset-0 ring-1 ring-inset ring-black/10 rounded-lg relative h-[50px] w-[72px] bg-cover bg-center"
           style={{
@@ -107,7 +107,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
             boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)',
           }}
         ></div>
-      </Link>
+      </LocaleLink>
       <div className="course_meta ps-5 grow space-y-1">
         <div className="course_top">
           <div className="course_info flex">
@@ -154,7 +154,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
                     {t('certificate.certificate')}
                   </span>
                 </div>
-                <Link
+                <LocaleLink
                   href={getUriWithOrg(props.orgslug, `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`)}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -162,7 +162,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
                 >
                   <span>{t('certificate.verify')}</span>
                   <ExternalLink className="w-3 h-3" />
-                </Link>
+                </LocaleLink>
               </div>
             ) : (
               <div className="flex items-center space-x-1 text-xs text-gray-500">

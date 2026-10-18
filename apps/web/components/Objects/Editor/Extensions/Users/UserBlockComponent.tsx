@@ -27,6 +27,7 @@ import UserAvatar from '@components/Objects/UserAvatar'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { useTranslation } from 'react-i18next'
+import { useLocalizedPath } from '@components/Contexts/LocaleContext'
 
 type UserData = {
   id: string
@@ -68,6 +69,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 }
 
 function UserBlockComponent(props: any) {
+  const lp = useLocalizedPath()
   const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -260,7 +262,7 @@ function UserBlockComponent(props: any) {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 text-neutral-500 hover:text-neutral-700 flex-shrink-0"
-                    onClick={() => userData.username && router.push(`/user/${userData.username}`)}
+                    onClick={() => userData.username && router.push(lp(`/user/${userData.username}`))}
                   >
                     <ArrowSquareOut weight="duotone" className="w-4 h-4" />
                   </Button>
@@ -339,7 +341,7 @@ function UserBlockComponent(props: any) {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 text-neutral-500 hover:text-neutral-700 flex-shrink-0"
-                    onClick={() => userData.username && router.push(`/user/${userData.username}`)}
+                    onClick={() => userData.username && router.push(lp(`/user/${userData.username}`))}
                   >
                     <ArrowSquareOut weight="duotone" className="w-4 h-4" />
                   </Button>

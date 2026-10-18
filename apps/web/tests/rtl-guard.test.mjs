@@ -36,10 +36,40 @@ describe('RTL language set', () => {
     expect(setBlock).toContain("'ar'")
     expect(setBlock).toContain("'fa'")
   })
+test('dir-init.js knows exactly the shipped locales', () => {
+    // dir-init.js reads the locale prefix off the URL, so it needs its own copy
+    // of the registry. A locale added to lib/locale-registry.ts but not here
+    // would silently fall through to the localStorage/navigator branch, and a
+    // `/si/...` page would paint English text under lang="en".
+    const initSrc = read('public/dir-init.js')
+    const registrySrc = read('lib/locale-registry.ts')
+
+    const knownBlock = initSrc.match(/var KNOWN = \{([\s\S]*?)\}/)
+    expect(knownBlock).not.toBeNull()
+    const initCodes = [...knownBlock[1].matchAll(/(\w+):\s*1/g)].map((m) => m[1]).sort()
+
+    const registryCodes = [...registrySrc.matchAll(/code:\s*'([a-z]+)'/g)].map((m) => m[1]).sort()
+
+    expect(initCodes.length).toBeGreaterThan(20)
+    expect(initCodes).toEqual(registryCodes)
+  })
+
+  // A prefix must never be read off /api or /embed: those URLs are fixed by
+  // contract, and "/embeddings" is an ordinary page that must stay localized.
+  test('dir-init.js does not treat api/embed segments as locales', () => {
+    const initSrc = read('public/dir-init.js')
+    const fn = initSrc.match(/function pathLocale\(\) \{([\s\S]*?)\n  \}/)
+    expect(fn).not.toBeNull()
+    expect(fn[1]).toContain("first === 'api'")
+    expect(fn[1]).toContain("first === 'embed'")
+  })
 })
 
 describe('language registry', () => {
-  const src = read('lib/languages.ts')
+  // The list itself moved to lib/locale-registry.ts so that lib/direction.ts
+  // could depend on it without gaining a module graph (global-error.tsx imports
+  // direction.ts with no providers mounted). lib/languages.ts re-exports it.
+  const src = read('lib/locale-registry.ts')
   const entries = [...src.matchAll(/\{\s*code:\s*'([a-z]+)'[^}]*\}/g)]
 
   test('every language declares a direction', () => {

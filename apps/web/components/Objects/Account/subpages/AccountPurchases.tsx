@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useQuery } from '@tanstack/react-query'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg } from '@services/config/config'
@@ -80,12 +80,12 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
 
         {/* Actions */}
         <div className="flex items-center gap-2 pt-1">
-          <Link
+          <LocaleLink
             href={getUriWithOrg(orgslug, `/store/offers/${enrollment.offer_id}`)}
             className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors px-3 py-2 rounded-lg"
           >
             View offer <ArrowRight size={11} />
-          </Link>
+          </LocaleLink>
           {isSubscription && (
             <button
               onClick={onManageBilling}
@@ -182,12 +182,12 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
           <p className="text-sm text-gray-400 max-w-xs">
             Your purchases and subscriptions will appear here once you buy something from the store.
           </p>
-          <Link
+          <LocaleLink
             href={getUriWithOrg(orgslug, '/store')}
             className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors px-4 py-2 rounded-xl"
           >
             Browse store <ArrowRight size={14} />
-          </Link>
+          </LocaleLink>
         </div>
       ) : (
         <div className="space-y-3">

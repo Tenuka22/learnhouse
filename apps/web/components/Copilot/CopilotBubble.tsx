@@ -38,7 +38,7 @@ import {
   CourseDropdown,
   SessionItem,
   groupSessionsByDate,
-} from '@/app/orgs/[orgslug]/(withmenu)/copilot/copilot'
+} from '@/app/[locale]/orgs/[orgslug]/(withmenu)/copilot/copilot'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 

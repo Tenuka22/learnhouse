@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 const ReactConfetti = dynamic(() => import('react-confetti'), { ssr: false });
 import { Trophy, ArrowLeft, ArrowRight, BookOpen, Target, Download, Shield } from 'lucide-react';
-import Link from 'next/link';
+import LocaleLink from '@components/Utils/LocaleLink'
 import { getUriWithOrg, getAbsoluteUriWithOrg } from '@services/config/config';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useWindowSize } from 'usehooks-ts';
@@ -337,7 +337,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
                   <Download className="w-5 h-5" />
                   <span>{t('certificate.download_certificate')}</span>
                 </button>
-                <Link
+                <LocaleLink
                   href={getUriWithOrg(orgslug, `/certificates/${userCertificate.certificate_user.user_certification_uuid}/verify`)}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -345,7 +345,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
                 >
                   <Shield className="w-5 h-5" />
                   <span>{t('certificate.verify_certificate')}</span>
-                </Link>
+                </LocaleLink>
               </div>
             </div>
           ) : (
@@ -358,23 +358,23 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           )}
 
           <div className="pt-6 flex flex-wrap justify-center gap-4">
-            <Link
+            <LocaleLink
               href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
               className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>{t('courses.back_to_course')}</span>
-            </Link>
+            </LocaleLink>
             {nextButton.external ? (
               <a href={nextButton.href} className={nextButtonClass}>
                 <span>{nextButtonLabel}</span>
                 <ArrowRight className="w-5 h-5 rtl:rotate-180" />
               </a>
             ) : (
-              <Link href={getUriWithOrg(orgslug, nextButton.href)} className={nextButtonClass}>
+              <LocaleLink href={getUriWithOrg(orgslug, nextButton.href)} className={nextButtonClass}>
                 <span>{nextButtonLabel}</span>
                 <ArrowRight className="w-5 h-5 rtl:rotate-180" />
-              </Link>
+              </LocaleLink>
             )}
           </div>
         </div>
@@ -446,13 +446,13 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           </p>
 
           <div className="pt-6">
-            <Link
+            <LocaleLink
               href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
               className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>{t('courses.continue_learning')}</span>
-            </Link>
+            </LocaleLink>
           </div>
         </div>
       </div>

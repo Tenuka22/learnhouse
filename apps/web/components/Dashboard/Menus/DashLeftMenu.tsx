@@ -46,8 +46,8 @@ import {
 import { motion } from 'motion/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import CommandPaletteTrigger from '@components/Dashboard/CommandPalette/CommandPaletteTrigger'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import LocaleLink from '@components/Utils/LocaleLink'
+import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import UserAvatar from '../../Objects/UserAvatar'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
@@ -70,6 +70,7 @@ import {
 } from "@components/ui/hover-menu"
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
+import { swapLocalePath } from '@/lib/locale'
 import OrgSquareLogo, { hasOrgLogo } from '@components/Objects/Org/OrgSquareLogo'
 import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
@@ -111,6 +112,7 @@ function DashLeftMenu() {
   const { t, i18n } = useTranslation()
   const { track } = useLHAnalytics('dashboard')
   const pathname = usePathname() || ''
+const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [upgradeHovered, setUpgradeHovered] = useState(false)
   // Onboarding takes over the search slot until setup is complete / dismissed.
@@ -248,7 +250,7 @@ function DashLeftMenu() {
         "relative flex items-center h-16 border-b border-white/[0.08] px-4 shrink-0",
         isCollapsed ? "justify-center" : "justify-between"
       )}>
-        <Link
+        <LocaleLink
           className={cn("flex items-center transition-opacity hover:opacity-70", isCollapsed ? "" : "space-x-3")}
           href={'/'}
         >
@@ -276,7 +278,7 @@ function DashLeftMenu() {
               </span>
             </div>
           )}
-        </Link>
+        </LocaleLink>
 
         {!isCollapsed && (
           <button
@@ -343,10 +345,10 @@ function DashLeftMenu() {
                   <HoverMenuLabel className="text-white/70 font-medium">{t('courses.courses')}</HoverMenuLabel>
                   <HoverMenuSeparator />
                   <HoverMenuItem asChild>
-                    <Link href="/dash/courses" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/courses" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <BookOpen size={16} weight="fill" />
                       <span>{t('common.all_courses')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   {recentCourses.length > 0 && (
                     <>
@@ -354,13 +356,13 @@ function DashLeftMenu() {
                       <HoverMenuLabel className="text-white/40">{t('common.recent')}</HoverMenuLabel>
                       {recentCourses.map((course: any) => (
                         <HoverMenuItem key={course.course_uuid} asChild>
-                          <Link
+                          <LocaleLink
                             href={`/dash/courses/course/${course.course_uuid.replace('course_', '')}/settings`}
                             className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors"
                           >
                             <PencilSimple size={14} className="text-white/40" />
                             <span className="truncate">{course.name}</span>
-                          </Link>
+                          </LocaleLink>
                         </HoverMenuItem>
                       ))}
                     </>
@@ -371,7 +373,7 @@ function DashLeftMenu() {
               {(() => {
                 const active = isActivePath('/dash/courses')
                 return (
-                  <Link
+                  <LocaleLink
                     href="/dash/courses"
                     aria-label={t('dashboard.nav.open_courses_menu')}
                     aria-current={active ? 'page' : undefined}
@@ -401,7 +403,7 @@ function DashLeftMenu() {
                         <CaretDown aria-hidden="true" size={14} weight="bold" className={active ? "text-white/70" : "text-white/40"} />
                       </>
                     )}
-                  </Link>
+                  </LocaleLink>
                 )
               })()}
             </HoverMenu>
@@ -414,10 +416,10 @@ function DashLeftMenu() {
                   <HoverMenuLabel className="text-white/70 font-medium">{t('common.assignments')}</HoverMenuLabel>
                   <HoverMenuSeparator />
                   <HoverMenuItem asChild>
-                    <Link href="/dash/assignments" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/assignments" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Files size={16} weight="fill" />
                       <span>{t('common.all_assignments')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   {recentAssignments.length > 0 && (
                     <>
@@ -425,7 +427,7 @@ function DashLeftMenu() {
                       <HoverMenuLabel className="text-white/40">{t('common.recent')}</HoverMenuLabel>
                       {recentAssignments.map((assignment: any) => (
                         <HoverMenuItem key={assignment.assignment_uuid} asChild>
-                          <Link
+                          <LocaleLink
                             href={`/dash/assignments/${assignment.assignment_uuid.replace('assignment_', '')}?subpage=editor`}
                             className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors"
                           >
@@ -434,7 +436,7 @@ function DashLeftMenu() {
                               <span className="truncate">{assignment.title}</span>
                               <span className="text-xs text-white/30 truncate">{assignment.courseName}</span>
                             </div>
-                          </Link>
+                          </LocaleLink>
                         </HoverMenuItem>
                       ))}
                     </>
@@ -445,7 +447,7 @@ function DashLeftMenu() {
               {(() => {
                 const active = isActivePath('/dash/assignments')
                 return (
-                  <Link
+                  <LocaleLink
                     href="/dash/assignments"
                     aria-label={t('dashboard.nav.open_assignments_menu')}
                     aria-current={active ? 'page' : undefined}
@@ -475,7 +477,7 @@ function DashLeftMenu() {
                         <CaretDown aria-hidden="true" size={14} weight="bold" className={active ? "text-white/70" : "text-white/40"} />
                       </>
                     )}
-                  </Link>
+                  </LocaleLink>
                 )
               })()}
             </HoverMenu>
@@ -532,34 +534,34 @@ function DashLeftMenu() {
                   <HoverMenuLabel className="text-white/70 font-medium">{t('common.users')}</HoverMenuLabel>
                   <HoverMenuSeparator />
                   <HoverMenuItem asChild>
-                    <Link href="/dash/users/settings/users" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/users/settings/users" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Users size={16} weight="fill" />
                       <span>{t('dashboard.users.settings.tabs.users')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/users/settings/usergroups" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/users/settings/usergroups" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <UsersThree size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.users.settings.tabs.usergroups')}<PlanBadge currentPlan={plan} requiredPlan="standard" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/users/settings/roles" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/users/settings/roles" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Shield size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.users.settings.tabs.roles')}<PlanBadge currentPlan={plan} requiredPlan="pro" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/users/settings/signups" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/users/settings/signups" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <ClipboardText size={16} weight="fill" />
                       <span>{t('dashboard.users.settings.tabs.signups')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/users/settings/add" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/users/settings/add" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <UserPlus size={16} weight="fill" />
                       <span>{t('dashboard.users.settings.tabs.add')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                 </HoverMenuContent>
               }
@@ -567,7 +569,7 @@ function DashLeftMenu() {
               {(() => {
                 const active = isActivePath('/dash/users')
                 return (
-                  <Link
+                  <LocaleLink
                     href="/dash/users/settings/users"
                     aria-label={t('dashboard.nav.open_users_menu')}
                     aria-current={active ? 'page' : undefined}
@@ -597,7 +599,7 @@ function DashLeftMenu() {
                         <CaretDown aria-hidden="true" size={14} weight="bold" className={active ? "text-white/70" : "text-white/40"} />
                       </>
                     )}
-                  </Link>
+                  </LocaleLink>
                 )
               })()}
             </HoverMenu>
@@ -619,42 +621,42 @@ function DashLeftMenu() {
                   <HoverMenuLabel className="text-white/70 font-medium">{t('common.organization')}</HoverMenuLabel>
                   <HoverMenuSeparator />
                   <HoverMenuItem asChild>
-                    <Link href="/dash/org/settings/general" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/org/settings/general" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Gear size={16} weight="fill" />
                       <span>{t('dashboard.organization.settings.tabs.general')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/org/settings/branding" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/org/settings/branding" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Palette size={16} weight="fill" />
                       <span>{t('dashboard.organization.settings.tabs.branding')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/org/settings/landing" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/org/settings/landing" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Rocket size={16} weight="fill" />
                       <span>{t('dashboard.organization.settings.tabs.landing')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/org/settings/ai" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/org/settings/ai" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Robot size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.organization.settings.tabs.ai')}<PlanBadge currentPlan={plan} requiredPlan="standard" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   {canManageOrg && (
                     <HoverMenuItem asChild>
-                      <Link href="/dash/org/settings/usage" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                      <LocaleLink href="/dash/org/settings/usage" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                         <ChartBar size={16} weight="fill" />
                         <span>{t('dashboard.organization.settings.tabs.usage') || 'Usage'}</span>
-                      </Link>
+                      </LocaleLink>
                     </HoverMenuItem>
                   )}
                   <HoverMenuItem asChild>
-                    <Link href="/dash/org/settings/other" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/org/settings/other" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Wrench size={16} weight="fill" />
                       <span>{t('dashboard.organization.settings.tabs.other')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                 </HoverMenuContent>
               }
@@ -662,7 +664,7 @@ function DashLeftMenu() {
               {(() => {
                 const active = isActivePath('/dash/org')
                 return (
-                  <Link
+                  <LocaleLink
                     href="/dash/org/settings/general"
                     aria-label={t('dashboard.nav.open_organization_menu')}
                     aria-current={active ? 'page' : undefined}
@@ -692,7 +694,7 @@ function DashLeftMenu() {
                         <CaretDown aria-hidden="true" size={14} weight="bold" className={active ? "text-white/70" : "text-white/40"} />
                       </>
                     )}
-                  </Link>
+                  </LocaleLink>
                 )
               })()}
             </HoverMenu>
@@ -704,34 +706,34 @@ function DashLeftMenu() {
                   <HoverMenuLabel className="text-white/70 font-medium">{t('dashboard.developers.breadcrumb', { defaultValue: 'Developers' })}</HoverMenuLabel>
                   <HoverMenuSeparator />
                   <HoverMenuItem asChild>
-                    <Link href="/dash/developers/api" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/developers/api" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Key size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.organization.settings.tabs.api', { defaultValue: 'API Access' })}<PlanBadge currentPlan={plan} requiredPlan="pro" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/developers/automations" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/developers/automations" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Lightning size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.organization.settings.tabs.automations', { defaultValue: 'Automations' })}<PlanBadge currentPlan={plan} requiredPlan="pro" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/developers/domains" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/developers/domains" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <LinkSimple size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.organization.settings.tabs.domains', { defaultValue: 'Domains' })}<PlanBadge currentPlan={plan} requiredPlan="standard" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/developers/seo" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/developers/seo" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <MagnifyingGlass size={16} weight="fill" />
                       <span>SEO</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/developers/sso" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/developers/sso" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Lock size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.organization.settings.tabs.sso', { defaultValue: 'SSO' })}<PlanBadge currentPlan={plan} requiredPlan="enterprise" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                 </HoverMenuContent>
               }
@@ -739,7 +741,7 @@ function DashLeftMenu() {
               {(() => {
                 const active = isActivePath('/dash/developers')
                 return (
-                  <Link
+                  <LocaleLink
                     href="/dash/developers/api"
                     aria-label={t('dashboard.nav.open_developers_menu')}
                     aria-current={active ? 'page' : undefined}
@@ -769,7 +771,7 @@ function DashLeftMenu() {
                         <CaretDown aria-hidden="true" size={14} weight="bold" className={active ? "text-white/70" : "text-white/40"} />
                       </>
                     )}
-                  </Link>
+                  </LocaleLink>
                 )
               })()}
             </HoverMenu>
@@ -781,16 +783,16 @@ function DashLeftMenu() {
                   <HoverMenuLabel className="text-white/70 font-medium">Analytics</HoverMenuLabel>
                   <HoverMenuSeparator />
                   <HoverMenuItem asChild>
-                    <Link href="/dash/analytics" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/analytics" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <ChartBar size={16} weight="fill" />
                       <span>{t('analytics.tabs.overview')}</span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                   <HoverMenuItem asChild>
-                    <Link href="/dash/analytics" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                    <LocaleLink href="/dash/analytics" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <ChartLine size={16} weight="fill" />
                       <span className="flex items-center">{t('analytics.tabs.advanced')}<PlanBadge currentPlan={plan} requiredPlan="enterprise" variant="dark" /></span>
-                    </Link>
+                    </LocaleLink>
                   </HoverMenuItem>
                 </HoverMenuContent>
               }
@@ -798,7 +800,7 @@ function DashLeftMenu() {
               {(() => {
                 const active = isActivePath('/dash/analytics')
                 return (
-                  <Link
+                  <LocaleLink
                     href="/dash/analytics"
                     aria-label={t('common.analytics')}
                     aria-current={active ? 'page' : undefined}
@@ -828,7 +830,7 @@ function DashLeftMenu() {
                         <CaretDown aria-hidden="true" size={14} weight="bold" className={active ? "text-white/70" : "text-white/40"} />
                       </>
                     )}
-                  </Link>
+                  </LocaleLink>
                 )
               })()}
             </HoverMenu>
@@ -847,42 +849,42 @@ function DashLeftMenu() {
                     <HoverMenuSeparator />
                     {!showCommunities && (
                       <HoverMenuItem asChild>
-                        <Link href="/dash/communities" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
+                        <LocaleLink href="/dash/communities" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
                           <ChatsCircle size={16} weight="fill" />
                           <span>{t('communities.title')}</span>
-                        </Link>
+                        </LocaleLink>
                       </HoverMenuItem>
                     )}
                     {!showPodcasts && (
                       <HoverMenuItem asChild>
-                        <Link href="/dash/podcasts" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
+                        <LocaleLink href="/dash/podcasts" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
                           <Headphones size={16} weight="fill" />
                           <span>{t('podcasts.podcasts')}</span>
-                        </Link>
+                        </LocaleLink>
                       </HoverMenuItem>
                     )}
                     {!showBoards && (
                       <HoverMenuItem asChild>
-                        <Link href="/dash/boards" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
+                        <LocaleLink href="/dash/boards" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
                           <ChalkboardSimple size={16} weight="fill" />
                           <span>{t('common.boards')}</span>
-                        </Link>
+                        </LocaleLink>
                       </HoverMenuItem>
                     )}
                     {!showPlaygrounds && (
                       <HoverMenuItem asChild>
-                        <Link href="/dash/playgrounds" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
+                        <LocaleLink href="/dash/playgrounds" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
                           <Cube size={16} weight="fill" />
                           <span>{t('common.playgrounds')}</span>
-                        </Link>
+                        </LocaleLink>
                       </HoverMenuItem>
                     )}
                     {!showPayments && (
                       <HoverMenuItem asChild>
-                        <Link href="/dash/payments/overview" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
+                        <LocaleLink href="/dash/payments/overview" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
                           <CurrencyCircleDollar size={16} weight="fill" />
                           <span>{t('common.payments')}</span>
-                        </Link>
+                        </LocaleLink>
                       </HoverMenuItem>
                     )}
                   </HoverMenuContent>
@@ -1072,7 +1074,7 @@ function DashLeftMenu() {
                 {AVAILABLE_LANGUAGES.map((language) => (
                   <HoverMenuItem
                     key={language.code}
-                    onClick={() => changeLanguage(language.code)}
+                    onClick={() => { changeLanguage(language.code); router.push(swapLocalePath(pathname, language.code)) }}
                     className="flex items-center justify-between px-3 py-2.5 cursor-pointer text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
                   >
                     <div className="flex flex-col">
@@ -1234,16 +1236,16 @@ function DashLeftMenu() {
                 </div>
                 <HoverMenuSeparator />
                 <HoverMenuItem asChild>
-                  <Link href="/account/general" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                  <LocaleLink href="/account/general" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                     <Gear size={16} weight="fill" />
                     <span>{t('common.settings')}</span>
-                  </Link>
+                  </LocaleLink>
                 </HoverMenuItem>
                 <HoverMenuItem asChild>
-                  <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                  <LocaleLink href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                     <ShoppingBag size={16} weight="fill" />
                     <span>{t('account.purchases')}</span>
-                  </Link>
+                  </LocaleLink>
                 </HoverMenuItem>
                 <HoverMenuSeparator />
                 <HoverMenuItem
@@ -1323,9 +1325,9 @@ const MenuLink = ({ href, icon, label, isCollapsed, isExternal, active, onClick 
       {content}
     </a>
   ) : (
-    <Link aria-label={label} aria-current={ariaCurrent} href={href} onClick={onClick}>
+    <LocaleLink aria-label={label} aria-current={ariaCurrent} href={href} onClick={onClick}>
       {content}
-    </Link>
+    </LocaleLink>
   )
 
   if (isCollapsed) {

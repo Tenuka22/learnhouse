@@ -7,7 +7,7 @@ import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { BookCopy, LogIn } from 'lucide-react'
@@ -41,9 +41,9 @@ function LandingClassic({ courses, orgslug, org_id }: LandingClassicProps) {
               checkMethod="roles"
               orgId={org_id}
             >
-              <Link href={getUriWithOrg(orgslug, '/courses?new=true')}>
+              <LocaleLink href={getUriWithOrg(orgslug, '/courses?new=true')}>
                 <NewCourseButton />
-              </Link>
+              </LocaleLink>
             </AuthenticatedClientElement>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -79,25 +79,25 @@ function LandingClassic({ courses, orgslug, org_id }: LandingClassicProps) {
                   )}
                 </p>
                 {!isAuthenticated && (
-                  <Link
+                  <LocaleLink
                     href={getUriWithOrg(orgslug, '/login')}
                     className="inline-flex items-center gap-2 justify-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors"
                   >
                     <LogIn size={16} />
                     {t('auth.sign_in', 'Sign in')}
-                  </Link>
+                  </LocaleLink>
                 )}
               </div>
             )}
           </div>
           {hasMoreCourses && (
             <div className="mt-4 text-center">
-              <Link
+              <LocaleLink
                 href={getUriWithOrg(orgslug, '/courses')}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 {t('courses.view_all_courses')} ({courses.length})
-              </Link>
+              </LocaleLink>
             </div>
           )}
         </div>

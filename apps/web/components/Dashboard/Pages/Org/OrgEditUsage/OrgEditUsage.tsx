@@ -21,7 +21,7 @@ import { OrgUsageResponse, getOrgUsage } from '@services/orgs/usage'
 import { apiFetch } from '@services/utils/ts/requests'
 import { usePlan } from '@components/Hooks/usePlan'
 import { OrgPacksResponse } from '@services/packs/packs'
-import { GENERAL_PLANS, type Plan } from '@/app/(hub)/_billing/plans'
+import { GENERAL_PLANS, type Plan } from '@/app/[locale]/(hub)/_billing/plans'
 
 
 interface AICreditsSummary {

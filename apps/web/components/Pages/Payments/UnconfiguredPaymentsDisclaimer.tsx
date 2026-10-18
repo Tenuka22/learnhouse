@@ -1,6 +1,6 @@
 import { CreditCard, Settings, ShoppingBag, Users } from 'lucide-react'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 
 const STEPS = [
   {
@@ -56,13 +56,13 @@ function UnconfiguredPaymentsDisclaimer() {
         </div>
 
         {/* CTA */}
-        <Link
+        <LocaleLink
           href="./configuration"
           className="inline-flex items-center space-x-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors duration-150"
         >
           <Settings size={13} />
           <span>Go to Payment Configuration</span>
-        </Link>
+        </LocaleLink>
       </div>
     </div>
   )

@@ -9,7 +9,7 @@
 // Legal pages live on the marketing/platform site, so links resolve via
 // getPlatformUrl() with a sensible public fallback.
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import { getPlatformUrl } from '@services/config/config'
 
@@ -22,23 +22,23 @@ export function AuthFooter({ className = '' }: { className?: string }) {
     <div className={`pb-8 pt-6 text-center px-6 ${className}`}>
       <p className="text-[13px] text-black/30 font-medium">
         {t('auth.terms_text', { defaultValue: "By continuing, you agree to LearnHouse's" })}{' '}
-        <Link
+        <LocaleLink
           href={TERMS_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-black/50 hover:text-black/70 transition-colors"
         >
           {t('auth.terms_of_service', { defaultValue: 'Terms of Service' })}
-        </Link>{' '}
+        </LocaleLink>{' '}
         {t('auth.and', { defaultValue: 'and' })}{' '}
-        <Link
+        <LocaleLink
           href={PRIVACY_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-black/50 hover:text-black/70 transition-colors"
         >
           {t('auth.privacy_policy', { defaultValue: 'Privacy Policy' })}
-        </Link>
+        </LocaleLink>
         .
       </p>
     </div>
@@ -65,22 +65,22 @@ export function CopyrightFooter({
           {t('common.copyright', { defaultValue: '© {{year}} LearnHouse, Inc.', year })}
         </p>
         <nav className="flex items-center gap-x-5">
-          <Link
+          <LocaleLink
             href={TERMS_URL}
             target="_blank"
             rel="noopener noreferrer"
             className={`${link} transition-colors`}
           >
             {t('auth.terms_of_service', { defaultValue: 'Terms of Service' })}
-          </Link>
-          <Link
+          </LocaleLink>
+          <LocaleLink
             href={PRIVACY_URL}
             target="_blank"
             rel="noopener noreferrer"
             className={`${link} transition-colors`}
           >
             {t('auth.privacy_policy', { defaultValue: 'Privacy Policy' })}
-          </Link>
+          </LocaleLink>
         </nav>
       </div>
     </footer>

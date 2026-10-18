@@ -4,7 +4,7 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import { getAPIUrl, getAbsoluteUriWithOrg } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { Check, Copy, Globe, Ticket, UserSquare, Users, X } from 'lucide-react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React, { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -209,13 +209,13 @@ function OrgAccess() {
                         </td>
                         <td className="py-3 px-4 sm:px-6">
                           <div className="flex items-center gap-2">
-                            <Link
+                            <LocaleLink
                               className="outline bg-gray-50 text-gray-600 px-2 py-1 rounded-md outline-gray-300 outline-dashed outline-1 text-xs truncate max-w-[200px] sm:max-w-[300px]"
                               target="_blank"
                               href={getAbsoluteUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}
                             >
                               {getAbsoluteUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}
-                            </Link>
+                            </LocaleLink>
                             <CopyButton text={getAbsoluteUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)} />
                           </div>
                         </td>

@@ -12,6 +12,7 @@ import {
   RefreshCcw,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useLocalizedPath } from '@components/Contexts/LocaleContext'
 import React, { useState } from 'react'
 
 type Variant = 'primary' | 'neutral' | 'danger' | 'ghost'
@@ -74,6 +75,7 @@ export interface ErrorActionsProps {
  */
 export default function ErrorActions({ resolutions, reset, eventId, loginNext }: ErrorActionsProps) {
   const router = useRouter()
+const lp = useLocalizedPath()
   const [signingOut, setSigningOut] = useState(false)
 
   // Dedupe while preserving order.
@@ -91,15 +93,15 @@ export default function ErrorActions({ resolutions, reset, eventId, loginNext }:
   const doSignOut = async () => {
     setSigningOut(true)
     try {
-      await signOut({ callbackUrl: '/login', redirect: true })
+      await signOut({ callbackUrl: lp('/login'), redirect: true })
     } catch {
-      window.location.href = '/login'
+      window.location.href = lp('/login')
     }
   }
 
   const loginHref = loginNext
-    ? `/login?next=${encodeURIComponent(loginNext)}`
-    : '/login'
+    ? lp(`/login?next=${encodeURIComponent(loginNext)}`)
+    : lp('/login')
   const supportHref = getPlatformUrl('/contact') || 'mailto:support@learnhouse.io'
 
   return (

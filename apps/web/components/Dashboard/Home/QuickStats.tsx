@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import {
   Broadcast,
   UserPlus,
@@ -55,12 +55,12 @@ export default function QuickStats() {
           <p className="text-[11px] text-gray-400 mb-3 max-w-[200px]">
             {t('dashboard.home.enable_analytics_description')}
           </p>
-          <Link
+          <LocaleLink
             href="/dash/analytics"
             className="text-[11px] font-medium text-blue-600 hover:text-blue-700"
           >
             {t('dashboard.home.enable')} &rarr;
-          </Link>
+          </LocaleLink>
         </div>
       </div>
     )
@@ -130,12 +130,12 @@ function QuickStatsContent() {
     <div className="bg-white rounded-xl nice-shadow p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-gray-700">{t('dashboard.home.quick_stats')}</h3>
-        <Link
+        <LocaleLink
           href="/dash/analytics"
           className="text-[11px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
         >
           {t('dashboard.home.full_analytics')} &rarr;
-        </Link>
+        </LocaleLink>
       </div>
       <div className="space-y-3">
         {stats.map((stat) => (

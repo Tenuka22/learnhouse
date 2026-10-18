@@ -3,15 +3,15 @@ import { useAssignmentSubmission, useAssignmentTaskSubmissions } from '@componen
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAssignmentSolutionFileDir, getTaskRefFileDir } from '@services/media/media';
-import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
-import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject'
-import TaskFormObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFormObject'
-import TaskCodeObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskCodeObject'
-import TaskShortAnswerObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskShortAnswerObject'
-import TaskNumberAnswerObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskNumberAnswerObject'
+import TaskFileObject from 'app/[locale]/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
+import TaskQuizObject from 'app/[locale]/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject'
+import TaskFormObject from 'app/[locale]/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFormObject'
+import TaskCodeObject from 'app/[locale]/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskCodeObject'
+import TaskShortAnswerObject from 'app/[locale]/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskShortAnswerObject'
+import TaskNumberAnswerObject from 'app/[locale]/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskNumberAnswerObject'
 import toast from 'react-hot-toast';
 import { AlarmClockOff, Backpack, BookOpenCheck, Calendar, CheckCircle2, ClipboardCheck, Download, EllipsisVertical, Info, Lock, MessageSquare, RotateCcw, XCircle } from 'lucide-react';
-import Link from 'next/link';
+import LocaleLink from '@components/Utils/LocaleLink'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { sortTasksByOrder } from '@/lib/assignments/taskOrder'
@@ -261,7 +261,7 @@ function AssignmentStudentActivity() {
               <p className='text-sm leading-relaxed text-slate-700 whitespace-pre-wrap'>{solutionText}</p>
             )}
             {solutionFile && (
-              <Link
+              <LocaleLink
                 href={getAssignmentSolutionFileDir(
                   org?.org_uuid,
                   assignments?.course_object.course_uuid,
@@ -276,7 +276,7 @@ function AssignmentStudentActivity() {
                 <p className='text-xs font-semibold'>
                   {t('assignments.solution_download', { defaultValue: 'Download the model answer' })}
                 </p>
-              </Link>
+              </LocaleLink>
             )}
           </div>
         </div>
@@ -304,7 +304,7 @@ function AssignmentStudentActivity() {
                   <Info size={13} />
                   <p className='text-xs font-semibold'>{t('assignments.hint')}</p>
                 </div>}
-                {task.reference_file && <Link
+                {task.reference_file && <LocaleLink
                   href={getTaskRefFileDir(
                     org?.org_uuid,
                     assignments?.course_object.course_uuid,
@@ -325,7 +325,7 @@ function AssignmentStudentActivity() {
                     )}
                     <p className='text-xs font-semibold'>{t('assignments.reference_document')}</p>
                   </div>
-                </Link>}
+                </LocaleLink>}
               </div>
             </div>
             {isGraded && !isUngraded && taskSubmission && (

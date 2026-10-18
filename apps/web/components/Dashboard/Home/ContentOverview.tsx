@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import {
@@ -172,7 +172,7 @@ export default function ContentOverview() {
       }`}
     >
       {visibleCards.map((card) => (
-        <Link
+        <LocaleLink
           key={card.label}
           href={card.href}
           className="bg-white rounded-xl nice-shadow px-5 py-4 hover:bg-gray-50 transition-colors group"
@@ -191,7 +191,7 @@ export default function ContentOverview() {
           </div>
           <div className="text-2xl font-bold text-gray-900">{card.value}</div>
           <p className="text-[11px] text-gray-300 mt-0.5">{card.sub}</p>
-        </Link>
+        </LocaleLink>
       ))}
     </div>
   )

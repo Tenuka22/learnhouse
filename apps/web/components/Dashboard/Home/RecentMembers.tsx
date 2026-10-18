@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
@@ -41,12 +41,12 @@ export default function RecentMembers() {
             </span>
           )}
         </div>
-        <Link
+        <LocaleLink
           href="/dash/users/settings/users"
           className="text-[11px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
         >
           {t('dashboard.home.view_all')} &rarr;
-        </Link>
+        </LocaleLink>
       </div>
 
       {isLoading ? (

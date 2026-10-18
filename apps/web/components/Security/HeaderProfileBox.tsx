@@ -1,7 +1,7 @@
 'use client'
 import React, { useMemo } from 'react'
 
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { Crown, Shield, User, Users, SignOut, CaretDown, Globe, Check, ShoppingBag, House, Buildings, Plus, CreditCard, MagnifyingGlass } from '@phosphor-icons/react'
 import UserAvatar from '@components/Objects/UserAvatar'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
@@ -207,12 +207,12 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
               <LanguageSwitcher primaryColor={primaryColor} />
             </li>
             <li>
-              <Link
+              <LocaleLink
                 className={`px-3 py-2 rounded-lg transition-colors text-sm font-bold ${colors.hoverBg} ${colors.text}`}
-                href={getUriWithOrg(org?.slug, '/login')} >{t('auth.login')}</Link>
+                href={getUriWithOrg(org?.slug, '/login')} >{t('auth.login')}</LocaleLink>
             </li>
             <li className={`rounded-lg shadow-sm transition-colors px-4 py-2 text-xs sm:text-sm font-bold ms-1 sm:ms-2 ${colors.signUpBtn}`}>
-              <Link href={getUriWithOrg(org?.slug, '/signup')}>{t('auth.sign_up')}</Link>
+              <LocaleLink href={getUriWithOrg(org?.slug, '/signup')}>{t('auth.sign_up')}</LocaleLink>
             </li>
           </ul>
         </div>
@@ -272,38 +272,38 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                 <DropdownMenuSeparator />
                 {rights?.dashboard?.action_access && (
                   <DropdownMenuItem asChild>
-                    <Link href="/dash" className="flex items-center space-x-2">
+                    <LocaleLink href="/dash" className="flex items-center space-x-2">
                       <Shield size={16} weight="fill" />
                       <span>{t('common.dashboard')}</span>
-                    </Link>
+                    </LocaleLink>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href="/account/general" className="flex items-center space-x-2">
+                  <LocaleLink href="/account/general" className="flex items-center space-x-2">
                     <User size={16} weight="fill" />
                     <span>{t('user.user_settings')}</span>
-                  </Link>
+                  </LocaleLink>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center space-x-2">
+                  <LocaleLink href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center space-x-2">
                     <ShoppingBag size={16} weight="fill" />
                     <span>{t('account.purchases')}</span>
-                  </Link>
+                  </LocaleLink>
                 </DropdownMenuItem>
                 {multiOrg && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href={getMainDomainUri('/home')} className="flex items-center space-x-2">
+                      <LocaleLink href={getMainDomainUri('/home')} className="flex items-center space-x-2">
                         <House size={16} weight="fill" />
                         <span>{t('common.home', { defaultValue: 'Home' })}</span>
-                      </Link>
+                      </LocaleLink>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={getMainDomainUri(`/billing?org=${org?.slug ?? ''}`)} className="flex items-center space-x-2">
+                      <LocaleLink href={getMainDomainUri(`/billing?org=${org?.slug ?? ''}`)} className="flex items-center space-x-2">
                         <CreditCard size={16} weight="fill" />
                         <span>{t('common.billing', { defaultValue: 'Billing' })}</span>
-                      </Link>
+                      </LocaleLink>
                     </DropdownMenuItem>
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger className="flex items-center gap-2 space-x-2">
@@ -314,7 +314,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                         <DropdownMenuSubContent className="max-h-72 overflow-auto">
                           {myOrgs.map((o: any) => (
                             <DropdownMenuItem key={o.id} asChild>
-                              <Link href={getUriWithOrg(o.slug, '/')} className="flex items-center space-x-2">
+                              <LocaleLink href={getUriWithOrg(o.slug, '/')} className="flex items-center space-x-2">
                                 <span className="w-5 h-5 rounded bg-white overflow-hidden flex items-center justify-center shrink-0 ring-1 ring-inset ring-black/5">
                                   <OrgSquareLogo
                                     org={o}
@@ -325,15 +325,15 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                                 </span>
                                 <span className="truncate flex-1">{o.name}</span>
                                 {o.id === org?.id && <Check size={14} weight="bold" className="text-green-600 shrink-0" />}
-                              </Link>
+                              </LocaleLink>
                             </DropdownMenuItem>
                           ))}
                           {myOrgs.length > 0 && <DropdownMenuSeparator />}
                           <DropdownMenuItem asChild>
-                            <Link href={getMainDomainUri('/new')} className="flex items-center space-x-2 font-semibold">
+                            <LocaleLink href={getMainDomainUri('/new')} className="flex items-center space-x-2 font-semibold">
                               <Plus size={16} weight="bold" />
                               <span>{t('common.create_organization', { defaultValue: 'Create organization' })}</span>
-                            </Link>
+                            </LocaleLink>
                           </DropdownMenuItem>
                         </DropdownMenuSubContent>
                       </DropdownMenuPortal>

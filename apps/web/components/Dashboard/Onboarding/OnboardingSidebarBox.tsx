@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { motion } from 'motion/react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { ListChecks, ArrowRight } from '@phosphor-icons/react'
 import { useOnboarding } from '@components/Hooks/useOnboarding'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -83,13 +83,13 @@ export default function OnboardingSidebarBox() {
         </div>
 
         {/* CTA button */}
-        <Link
+        <LocaleLink
           href={href}
           className="group mt-3 flex items-center justify-center gap-1.5 w-full rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-[12px] font-semibold py-2 transition-colors"
         >
           {t('onboarding.continue_setup', { defaultValue: 'Continue setup' })}
           <ArrowRight size={12} weight="bold" className="transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" data-dir-flip />
-        </Link>
+        </LocaleLink>
       </div>
     </motion.div>
   )

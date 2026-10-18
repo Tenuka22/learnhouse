@@ -2,11 +2,11 @@
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import SaveState from './SaveState'
-import { CourseOverviewParams } from 'app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page'
+import { CourseOverviewParams } from 'app/[locale]/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page'
 import { getUriWithOrg } from '@services/config/config'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import Image from 'next/image'
 import EmptyThumbnailImage from '../../../public/empty_thumbnail.png'
 import { BookCopy, BrainCircuit, Eye, Globe, GlobeLock, Loader2, Check } from 'lucide-react'
@@ -153,7 +153,7 @@ export function CourseOverviewTop({
       </div>
       <div className="flex flex-wrap gap-2 items-center">
         <div className="flex py-2 grow min-w-0 items-center">
-          <Link
+          <LocaleLink
             href={getUriWithOrg(org?.slug, '') + `/course/${params.courseuuid}`}
             className="shrink-0"
           >
@@ -175,7 +175,7 @@ export function CourseOverviewTop({
                 alt={courseStructure?.name || ''}
               />
             )}
-          </Link>
+          </LocaleLink>
           <div className="flex flex-col course_metadata justify-center ps-3 sm:ps-5 min-w-0">
             <div className="text-gray-400 font-semibold text-xs sm:text-sm">{t('dashboard.courses.overview_top.course_label')}</div>
             <div className="text-black font-bold text-base sm:text-xl -mt-0.5 first-letter:uppercase truncate">
@@ -260,7 +260,7 @@ export function CourseOverviewTop({
             </>
           )}
           <div className="w-px self-stretch bg-neutral-200/80" />
-          <Link
+          <LocaleLink
             href={getUriWithOrg(org?.slug, '') + `/course/${params.courseuuid}`}
             target="_blank"
             aria-label={t('dashboard.courses.preview')}
@@ -269,7 +269,7 @@ export function CourseOverviewTop({
           >
             <Eye className="w-4 h-4" />
             <span className="hidden sm:inline">{t('dashboard.courses.preview')}</span>
-          </Link>
+          </LocaleLink>
         </div>
       </div>
     </>

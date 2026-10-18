@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import CopilotBubble from '@components/Copilot/CopilotBubble'
 import Image from 'next/image'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getUriWithOrg } from '@services/config/config'
@@ -154,7 +154,7 @@ export const OrgMenu = (props: any) => {
         <div className="flex items-center justify-between w-full max-w-(--breakpoint-2xl) mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center space-x-5 md:w-auto w-full">
             <div className="logo flex md:w-auto w-full justify-center">
-              <Link href={getUriWithOrg(orgslug, '/')}>
+              <LocaleLink href={getUriWithOrg(orgslug, '/')}>
                 <div className="flex w-auto h-9 rounded-md items-center m-auto py-1 justify-center">
                   {org?.logo_image ? (
                     <img
@@ -167,7 +167,7 @@ export const OrgMenu = (props: any) => {
                     <LearnHouseLogo logoFilter={colors.logoFilter} />
                   )}
                 </div>
-              </Link>
+              </LocaleLink>
             </div>
             <div className="hidden md:flex">
               <MenuLinks orgslug={orgslug} primaryColor={primaryColor} />
@@ -186,13 +186,13 @@ export const OrgMenu = (props: any) => {
                 <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Link
+                      <LocaleLink
                         href={getUriWithOrg(orgslug, '/trail')}
                         className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
                         aria-label={t('courses.progress')}
                       >
                         <Signpost size={20} weight="fill" />
-                      </Link>
+                      </LocaleLink>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="text-xs">
                       {t('courses.progress')}
@@ -208,13 +208,13 @@ export const OrgMenu = (props: any) => {
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Link
+                        <LocaleLink
                           href={getUriWithOrg(orgslug, '/boards')}
                           className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
                           aria-label="Boards"
                         >
                           <ChalkboardSimple size={20} weight="fill" />
-                        </Link>
+                        </LocaleLink>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="text-xs">
                         Boards
@@ -270,14 +270,14 @@ export const OrgMenu = (props: any) => {
                       const IconComponent = item.icon
                       return (
                         <DropdownMenuItem key={item.id} asChild>
-                          <Link
+                          <LocaleLink
                             href={item.href}
                             className="flex items-center gap-2"
                             onClick={() => track(AnalyticsEvent.DashboardEntered, { source: 'org_menu' })}
                           >
                             <IconComponent size={16} weight="fill" />
                             <span>{t(item.labelKey)}</span>
-                          </Link>
+                          </LocaleLink>
                         </DropdownMenuItem>
                       )
                     })}
@@ -497,10 +497,10 @@ const CopilotMenuButton = ({
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem key={s.aichat_uuid} asChild>
-                  <Link href={getUriWithOrg(orgslug, `/copilot?chat=${s.aichat_uuid}`)} className="flex items-center gap-2">
+                  <LocaleLink href={getUriWithOrg(orgslug, `/copilot?chat=${s.aichat_uuid}`)} className="flex items-center gap-2">
                     <ChatCircleDots size={14} weight="fill" className="shrink-0 text-neutral-400" />
                     <span className="truncate text-sm">{s.title || 'Untitled'}</span>
-                  </Link>
+                  </LocaleLink>
                 </DropdownMenuItem>
               )
             ))}
@@ -523,10 +523,10 @@ const CopilotMenuButton = ({
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem asChild>
-            <Link href={getUriWithOrg(orgslug, '/copilot')} className="flex items-center gap-2 font-medium">
+            <LocaleLink href={getUriWithOrg(orgslug, '/copilot')} className="flex items-center gap-2 font-medium">
               <ChatCircle size={14} weight="fill" className="text-violet-500" />
               <span>{recentSessions.length > 0 ? 'View all conversations' : 'Start a conversation'}</span>
-            </Link>
+            </LocaleLink>
           </DropdownMenuItem>
         )}
 

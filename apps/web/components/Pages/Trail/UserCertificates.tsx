@@ -5,7 +5,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { Award, ExternalLink, Calendar, Building } from 'lucide-react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getAllUserCertificates } from '@services/courses/certifications'
@@ -127,7 +127,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
               className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]"
             >
               {/* Thumbnail */}
-              <Link
+              <LocaleLink
                 href={verificationLink}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -149,18 +149,18 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                     <Award className="w-8 h-8 text-yellow-500" />
                   </div>
                 </div>
-              </Link>
+              </LocaleLink>
 
               {/* Content */}
               <div className="p-3 flex flex-col space-y-1.5">
-                <Link
+                <LocaleLink
                   href={verificationLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
                 >
                   {certificate.certification.config.certification_name}
-                </Link>
+                </LocaleLink>
 
                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
                   <Building className="w-3 h-3" />
@@ -175,7 +175,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                     </span>
                   </div>
 
-                  <Link
+                  <LocaleLink
                     href={verificationLink}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -183,7 +183,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                   >
                     {t('certificate.verify')}
                     <ExternalLink className="w-3 h-3" />
-                  </Link>
+                  </LocaleLink>
                 </div>
               </div>
             </div>

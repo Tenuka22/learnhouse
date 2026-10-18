@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
@@ -50,12 +50,12 @@ export default function RecentCourses() {
             </div>
           )}
         </div>
-        <Link
+        <LocaleLink
           href="/dash/courses"
           className="text-[11px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
         >
           {t('dashboard.home.view_all')} &rarr;
-        </Link>
+        </LocaleLink>
       </div>
 
       {isLoading ? (
@@ -81,13 +81,13 @@ export default function RecentCourses() {
               />
             </div>
             <p className="text-xs text-gray-400 mb-3">{t('dashboard.home.no_courses_yet')}</p>
-            <Link
+            <LocaleLink
               href="/dash/courses?new=true"
               className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700"
             >
               <PlusCircle size={14} weight="bold" />
               {t('dashboard.home.create_your_first_course')}
-            </Link>
+            </LocaleLink>
           </div>
         </div>
       ) : (
@@ -110,7 +110,7 @@ export default function RecentCourses() {
               : null
 
             return (
-              <Link
+              <LocaleLink
                 key={course.course_uuid}
                 prefetch={false}
                 href={`/dash/courses/course/${courseId}/general`}
@@ -160,7 +160,7 @@ export default function RecentCourses() {
                 >
                   {course.published ? t('dashboard.home.published') : t('dashboard.home.draft')}
                 </span>
-              </Link>
+              </LocaleLink>
             )
           })}
         </div>

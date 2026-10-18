@@ -8,7 +8,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUserCertificates } from '@services/courses/certifications'
 import { useCourseCertification } from '@components/Hooks/useCourseCertification'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -138,7 +138,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       </div>
 
       {/* Thumbnail */}
-      <Link
+      <LocaleLink
         href={courseLink}
         className="block relative aspect-video overflow-hidden bg-gray-50"
       >
@@ -164,16 +164,16 @@ function TrailCourseCard(props: TrailCourseCardProps) {
             style={{ width: `${course_progress}%` }}
           />
         </div>
-      </Link>
+      </LocaleLink>
 
       {/* Content */}
       <div className="p-3 flex flex-col space-y-1.5">
-        <Link
+        <LocaleLink
           href={courseLink}
           className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
         >
           {course.name}
-        </Link>
+        </LocaleLink>
 
         <div className="flex items-center gap-2 text-sm">
           <span className={`font-semibold ${course_progress === 100 ? 'text-green-600' : 'text-teal-600'}`}>
@@ -211,7 +211,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
           )}
 
           {course_progress === 100 && showCertificateUI && courseCertificate ? (
-            <Link
+            <LocaleLink
               href={getUriWithOrg(props.orgslug, `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`)}
               target="_blank"
               rel="noopener noreferrer"
@@ -219,14 +219,14 @@ function TrailCourseCard(props: TrailCourseCardProps) {
             >
               {t('certificate.verify')}
               <ExternalLink className="w-3 h-3" />
-            </Link>
+            </LocaleLink>
           ) : (
-            <Link
+            <LocaleLink
               href={courseLink}
               className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
             >
               {t('courses.continue_learning')}
-            </Link>
+            </LocaleLink>
           )}
         </div>
       </div>

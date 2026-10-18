@@ -28,8 +28,8 @@ import {
   Code,
 } from '@phosphor-icons/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import LocaleLink from '@components/Utils/LocaleLink'
+import { usePathname, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import UserAvatar from '../../Objects/UserAvatar'
@@ -38,6 +38,7 @@ import { getUriWithOrg, getDeploymentMode } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { changeLanguage } from '@/lib/i18n'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
+import { swapLocalePath } from '@/lib/locale'
 import OrgSquareLogo, { hasOrgLogo } from '@components/Objects/Org/OrgSquareLogo'
 import { cn } from '@/lib/utils'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -50,6 +51,7 @@ function DashMobileMenu() {
   const session = useLHSession() as any
   const { t, i18n } = useTranslation()
   const pathname = usePathname() || ''
+const router = useRouter()
   const plan = usePlan()
   const { toggle: openSearch } = useCommandPalette()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -94,7 +96,7 @@ function DashMobileMenu() {
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}
         >
           {/* LearnHouse logo, links to home */}
-          <Link
+          <LocaleLink
             href="/dash"
             className="flex items-center justify-center px-2.5 py-2.5 rounded-full transition-all duration-200"
             aria-label={t('common.home')}
@@ -105,7 +107,7 @@ function DashMobileMenu() {
               className="h-[18px] w-[18px] opacity-60 hover:opacity-90 transition-opacity"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
-          </Link>
+          </LocaleLink>
           {/* Progressive reveal: more icons as viewport widens */}
           <PillLink href="/dash/courses" icon={<BookOpen size={18} weight="fill" />} active={isActive('/dash/courses')} className="hidden min-[340px]:flex" />
           <PillLink href="/dash/assignments" icon={<Files size={18} weight="fill" />} active={isActive('/dash/assignments')} className="hidden min-[390px]:flex" />
@@ -248,7 +250,7 @@ function DashMobileMenu() {
                     {AVAILABLE_LANGUAGES.map(lang => (
                       <button
                         key={lang.code}
-                        onClick={() => { changeLanguage(lang.code); setLangExpanded(false) }}
+                        onClick={() => { changeLanguage(lang.code); router.push(swapLocalePath(pathname, lang.code)); setLangExpanded(false) }}
                         className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-sm text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
                       >
                         <span className="font-medium">{lang.nativeName}</span>
@@ -325,7 +327,7 @@ const PillLink = ({
   active: boolean
   className?: string
 }) => (
-  <Link
+  <LocaleLink
     href={href}
     className={cn(
       'flex items-center justify-center p-2.5 rounded-full transition-all duration-200',
@@ -334,7 +336,7 @@ const PillLink = ({
     )}
   >
     {icon}
-  </Link>
+  </LocaleLink>
 )
 
 const PanelItem = ({
@@ -350,7 +352,7 @@ const PanelItem = ({
   active: boolean
   onClick: () => void
 }) => (
-  <Link
+  <LocaleLink
     href={href}
     onClick={onClick}
     aria-current={active ? 'page' : undefined}
@@ -367,7 +369,7 @@ const PanelItem = ({
     )}
     {icon}
     <span className="text-sm font-medium">{label}</span>
-  </Link>
+  </LocaleLink>
 )
 
 export default DashMobileMenu

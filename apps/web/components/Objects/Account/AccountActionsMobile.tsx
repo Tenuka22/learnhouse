@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { User, Lock, ShoppingBag, Settings } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
@@ -28,7 +28,7 @@ export function AccountActionsMobile({ orgslug, currentSubpage }: AccountActions
             const Icon = item.icon
             const isActive = currentSubpage === item.id
             return (
-              <Link
+              <LocaleLink
                 key={item.id}
                 href={getUriWithOrg(orgslug, `/account/${item.id}`)}
                 className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
@@ -41,7 +41,7 @@ export function AccountActionsMobile({ orgslug, currentSubpage }: AccountActions
                 <span className="text-[10px] font-medium truncate max-w-[60px]">
                   {t(item.labelKey)}
                 </span>
-              </Link>
+              </LocaleLink>
             )
           })}
         </div>

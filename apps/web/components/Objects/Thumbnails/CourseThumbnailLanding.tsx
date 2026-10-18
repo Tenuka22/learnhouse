@@ -8,7 +8,7 @@ import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@
 import { revalidateTags } from '@services/utils/ts/requests'
 import { BookMinus, FilePenLine, Settings2, MoreVertical } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import toast from 'react-hot-toast'
@@ -78,14 +78,14 @@ const AdminEditOptions: React.FC<AdminEditOptionsProps> = ({ course, orgslug, de
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem asChild>
-              <Link prefetch href={getUriWithOrg(orgslug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)}>
+              <LocaleLink prefetch href={getUriWithOrg(orgslug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)}>
                 <FilePenLine className="me-2 h-4 w-4" /> {t('courses.edit_content')}
-              </Link>
+              </LocaleLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link prefetch href={getUriWithOrg(orgslug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)}>
+              <LocaleLink prefetch href={getUriWithOrg(orgslug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)}>
                 <Settings2 className="me-2 h-4 w-4" /> {t('common.settings')}
-              </Link>
+              </LocaleLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <ConfirmationModal
@@ -146,12 +146,12 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
         orgslug={orgslug}
         deleteCourse={deleteCourse}
       />
-      <Link prefetch={false} href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
+      <LocaleLink prefetch={false} href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
         <div
           className="inset-0 ring-1 ring-inset ring-black/10 rounded-t-xl w-full aspect-video bg-cover bg-center"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
-      </Link>
+      </LocaleLink>
       <div className='flex flex-col w-full p-4 space-y-3'>
         <div className="space-y-2">
           <h2 className="font-bold text-gray-800 leading-tight text-base min-h-[2.75rem] line-clamp-2" dir="auto">{course.name}</h2>
@@ -200,13 +200,13 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
           )}
         </div>
 
-        <Link 
+        <LocaleLink 
           prefetch 
           href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
           className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-black text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
         >
           {t('courses.start_learning')}
-        </Link>
+        </LocaleLink>
       </div>
     </div>
   )

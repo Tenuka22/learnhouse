@@ -2,6 +2,12 @@ import { getAPIUrl } from './services/config/config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isLocalhost as isLocalhostCheck } from './services/utils/ts/hostUtils'
+import {
+  getPathLocale,
+  localizePath,
+  pickLocaleFromHints,
+  stripLocale,
+} from './lib/locale'
 
 // =============================================================================
 // Tenancy
@@ -131,6 +137,10 @@ async function isAdminSubdomain(host: string | null, instance: InstanceInfo): Pr
 // Cookies
 // =============================================================================
 
+/** Cookie i18next reads for language detection; kept in step with lib/i18n.ts. */
+const I18N_COOKIE = 'i18next'
+const I18N_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
+
 /**
  * Compute the cookie `domain` attribute given the current tenant.
  * - single tenancy → '' (host-only cookie)
@@ -229,8 +239,54 @@ export const config = {
 
 export default async function proxy(req: NextRequest) {
   const instance = await getInstanceInfo()
-  const { pathname, search } = req.nextUrl
+  const { search } = req.nextUrl
   const fullhost = req.headers.get('host')
+
+  // -------------------------------------------------------------------------
+  // 0. Locale prefix
+  //
+  //    Every user-facing URL carries its language: /si/courses, /en/home. This
+  //    has to happen FIRST, before any tenancy branch below, because each of
+  //    those branches matches on `pathname` and rewrites to a different
+  //    destination — and all of them have to end up under the same prefix.
+  //
+  //    From here on, `pathname` is locale-less (so the tenancy logic below
+  //    reads exactly as it always has) and every rewrite/redirect destination is
+  //    passed through `localize()` to put the prefix back. `localizePath`
+  //    leaves /api and /embed alone, which is what keeps the sitemap, robots,
+  //    podcast-feed and health destinations below unprefixed.
+  // -------------------------------------------------------------------------
+  const locale = getPathLocale(req.nextUrl.pathname)
+  const pathname = stripLocale(req.nextUrl.pathname)
+
+  if (!locale) {
+    // No prefix yet: send the visitor to the localized URL so the address bar,
+    // a shared link and a bookmark all carry the language.
+    //
+    // Deliberately a redirect to the ORIGINAL public path, not to the rewritten
+    // internal one — `/courses` must stay `/courses`, never `/orgs/{slug}/courses`.
+    //
+    // 307, not 308: the answer depends on the visitor's cookie and
+    // Accept-Language, so it is not a permanent property of this URL.
+    const detected = pickLocaleFromHints(
+      req.cookies.get(I18N_COOKIE)?.value,
+      req.nextUrl.searchParams.get('lng'),
+      req.headers.get('accept-language'),
+    )
+    const response = NextResponse.redirect(
+      new URL(`/${detected}${pathname}${search}`, req.url),
+      307,
+    )
+    response.cookies.set(I18N_COOKIE, detected, {
+      path: '/',
+      maxAge: I18N_COOKIE_MAX_AGE,
+      sameSite: 'lax',
+    })
+    return response
+  }
+
+  /** Re-attach the locale prefix to a rewrite/redirect destination. */
+  const localize = (destination: string): string => localizePath(destination, locale)
 
   // SEO: canonicalize mixed-case top-level route names (/Login → /login). Scoped
   // to KNOWN static routes only so it never lowercases data-bearing segments
@@ -240,7 +296,7 @@ export default async function proxy(req: NextRequest) {
     '/home', '/billing', '/new', '/account', '/organizations', '/subscriptions',
   ])
   if (pathname !== pathname.toLowerCase() && CANONICAL_LOWER.has(pathname.toLowerCase())) {
-    return NextResponse.redirect(new URL(`${pathname.toLowerCase()}${search}`, req.url), 308)
+    return NextResponse.redirect(new URL(localize(`${pathname.toLowerCase()}${search}`), req.url), 308)
   }
 
   // -------------------------------------------------------------------------
@@ -253,7 +309,7 @@ export default async function proxy(req: NextRequest) {
     const target = pathname === '/admin' || pathname.startsWith('/admin/')
       ? pathname
       : `/admin${pathname}`
-    const response = NextResponse.rewrite(new URL(`${target}${search}`, req.url))
+    const response = NextResponse.rewrite(new URL(localize(`${target}${search}`), req.url))
     setInstanceCookies(response, instance)
     return response
   }
@@ -264,7 +320,7 @@ export default async function proxy(req: NextRequest) {
   //     multi mode it's an alternative to the admin.{domain} subdomain.
   // -------------------------------------------------------------------------
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
+    const response = NextResponse.rewrite(new URL(localize(`${pathname}${search}`), req.url))
     setInstanceCookies(response, instance)
     return response
   }
@@ -293,7 +349,7 @@ export default async function proxy(req: NextRequest) {
     // Preserve query markers (checkout=cancelled, session_id, …). /billing?org=
     // already carries a query, so merge with & in that case.
     const extraQuery = search ? (dest.includes('?') ? `&${search.slice(1)}` : search) : ''
-    return NextResponse.redirect(new URL(`${dest}${extraQuery}`, req.url), 308)
+    return NextResponse.redirect(new URL(localize(`${dest}${extraQuery}`), req.url), 308)
   }
 
   // -------------------------------------------------------------------------
@@ -311,7 +367,7 @@ export default async function proxy(req: NextRequest) {
   // the picker links back there, so the picker is a dead step. Every sign-in,
   // signup and verify path defaults to /home; send them all to the org instead.
   if (instance.tenancy === 'single' && pathname === '/home') {
-    return NextResponse.redirect(new URL(`/${search}`, req.url))
+    return NextResponse.redirect(new URL(localize(`/`), req.url))
   }
 
   const HUB_ROOT_PATHS = ['/home', '/organizations', '/account', '/billing', '/subscriptions', '/new']
@@ -329,7 +385,7 @@ export default async function proxy(req: NextRequest) {
       onOrgHost = resolved.source === 'subdomain' || resolved.source === 'custom-domain'
     }
     if (!onOrgHost) {
-      const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
+      const response = NextResponse.rewrite(new URL(localize(`${pathname}${search}`), req.url))
       setInstanceCookies(response, instance)
       return response
     }
@@ -348,7 +404,7 @@ export default async function proxy(req: NextRequest) {
     // they arrive with a pending second factor: a sign-in link for another
     // account hands its 2FA step over here, and bouncing would drop it.
     if (pathname === '/login' && hasSession && !req.nextUrl.searchParams.has('mfa_token')) {
-      return NextResponse.redirect(new URL('/home', req.url))
+      return NextResponse.redirect(new URL(localize('/home'), req.url))
     }
 
     const resolved = await resolveTenant(req, instance)
@@ -366,13 +422,13 @@ export default async function proxy(req: NextRequest) {
         || resolved.source === 'custom-domain'
       const hasInviteCode = !!req.nextUrl.searchParams.get('inviteCode')
       if (!onOrgHost && !hasInviteCode) {
-        return NextResponse.redirect(new URL('/home', req.url))
+        return NextResponse.redirect(new URL(localize('/home'), req.url))
       }
     }
 
     const requestHeaders = tenantRequestHeaders(req, resolved, instance)
     const response = NextResponse.rewrite(
-      new URL(`/auth${pathname}${search}`, req.url),
+      new URL(localize(`/auth${pathname}${search}`), req.url),
       { request: { headers: requestHeaders } },
     )
     setOrgCookies(response, resolved, instance)
@@ -388,7 +444,7 @@ export default async function proxy(req: NextRequest) {
     || pathname.startsWith('/auth/callback/')
     || pathname.startsWith('/auth/token-exchange')
   ) {
-    const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
+    const response = NextResponse.rewrite(new URL(localize(`${pathname}${search}`), req.url))
     setInstanceCookies(response, instance)
     return response
   }
@@ -403,7 +459,7 @@ export default async function proxy(req: NextRequest) {
     const resolved = await resolveTenant(req, instance)
     const requestHeaders = tenantRequestHeaders(req, resolved, instance)
     const response = NextResponse.rewrite(
-      new URL(`${pathname}${search}`, req.url),
+      new URL(localize(`${pathname}${search}`), req.url),
       { request: { headers: requestHeaders } },
     )
     setOrgCookies(response, resolved, instance)
@@ -415,15 +471,15 @@ export default async function proxy(req: NextRequest) {
   // 5. Standalone editors / boards: bypass org rewrite
   // -------------------------------------------------------------------------
   if (pathname.match(/^\/course\/[^/]+\/activity\/[^/]+\/edit$/)) {
-    return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url))
+    return NextResponse.rewrite(new URL(localize(`/editor${pathname}`), req.url))
   }
   if (pathname.startsWith('/board/')) {
-    const response = NextResponse.rewrite(new URL(pathname + search, req.url))
+    const response = NextResponse.rewrite(new URL(localize(pathname) + search, req.url))
     setInstanceCookies(response, instance)
     return response
   }
   if (pathname.startsWith('/editor/playground/')) {
-    const response = NextResponse.rewrite(new URL(pathname + search, req.url))
+    const response = NextResponse.rewrite(new URL(localize(pathname) + search, req.url))
     setInstanceCookies(response, instance)
     return response
   }
@@ -433,14 +489,14 @@ export default async function proxy(req: NextRequest) {
   //    rewritten into an org route. The page reads code/state itself.
   // -------------------------------------------------------------------------
   if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
-    return NextResponse.rewrite(new URL(pathname + search, req.url))
+    return NextResponse.rewrite(new URL(localize(pathname) + search, req.url))
   }
 
   // -------------------------------------------------------------------------
   // 7. Health check
   // -------------------------------------------------------------------------
   if (pathname.startsWith('/health')) {
-    return NextResponse.rewrite(new URL(`/api/health`, req.url))
+    return NextResponse.rewrite(new URL(localize(`/api/health`), req.url))
   }
 
   // -------------------------------------------------------------------------
@@ -480,7 +536,7 @@ export default async function proxy(req: NextRequest) {
       }
     }
 
-    const redirectUrl = new URL(dest, base)
+    const redirectUrl = new URL(localize(dest), base)
     const remaining = params.toString()
     if (remaining) {
       redirectUrl.search = redirectUrl.search
@@ -495,21 +551,21 @@ export default async function proxy(req: NextRequest) {
   // -------------------------------------------------------------------------
   if (pathname.match(/^\/podcast\/([^/]+)\/feed$/)) {
     const resolved = await resolveTenant(req, instance)
-    const feedUrl = new URL(`/api${pathname}`, req.url)
+    const feedUrl = new URL(localize(`/api${pathname}`), req.url)
     const response = NextResponse.rewrite(feedUrl)
     response.headers.set('X-Feed-Orgslug', resolved.slug)
     return response
   }
   if (pathname.startsWith('/sitemap.xml')) {
     const resolved = await resolveTenant(req, instance)
-    const sitemapUrl = new URL(`/api/sitemap`, req.url)
+    const sitemapUrl = new URL(localize(`/api/sitemap`), req.url)
     const response = NextResponse.rewrite(sitemapUrl)
     response.headers.set('X-Sitemap-Orgslug', resolved.slug)
     return response
   }
   if (pathname === '/robots.txt') {
     const resolved = await resolveTenant(req, instance)
-    const robotsUrl = new URL(`/api/robots`, req.url)
+    const robotsUrl = new URL(localize(`/api/robots`), req.url)
     const response = NextResponse.rewrite(robotsUrl)
     response.headers.set('X-Robots-Orgslug', resolved.slug)
     return response
@@ -538,7 +594,7 @@ export default async function proxy(req: NextRequest) {
       const hasSession = !!req.cookies.get('LH_session')?.value
       const target = hasSession ? `/home${search}` : `/auth/login${search}`
       const requestHeaders = tenantRequestHeaders(req, resolved, instance)
-      const response = NextResponse.rewrite(new URL(target, req.url), {
+      const response = NextResponse.rewrite(new URL(localize(target), req.url), {
         request: { headers: requestHeaders },
       })
       setOrgCookies(response, resolved, instance)
@@ -557,7 +613,7 @@ export default async function proxy(req: NextRequest) {
   // as the request's. Every other branch above appends it; this one did not, so
   // org-scoped pages lost their query string (?page, ?q, ?tab, …).
   const response = NextResponse.rewrite(
-    new URL(`/orgs/${resolved.slug}${pathname}${search}`, req.url),
+    new URL(localize(`/orgs/${resolved.slug}${pathname}${search}`), req.url),
     { request: { headers: requestHeaders } },
   )
   setOrgCookies(response, resolved, instance)

@@ -1,5 +1,5 @@
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { Draggable } from '@hello-pangea/dnd'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import {
@@ -151,7 +151,7 @@ function Activity(props: any) {
           <div className="flex flex-row space-x-2">
             {props.activity.type === 'TYPE_DYNAMIC' && (
               <>
-                <Link
+                <LocaleLink
                   href={
                     getUriWithOrg(props.orgslug, '') +
                     `/course/${props.courseid
@@ -164,10 +164,10 @@ function Activity(props: any) {
                   rel="noopener noreferrer"
                 >
                   <div className="text-sky-100 font-bold text-xs">Edit </div>
-                </Link>
+                </LocaleLink>
               </>
             )}
-            <Link
+            <LocaleLink
               href={
                 getUriWithOrg(props.orgslug, '') +
                 `/course/${props.courseid
@@ -177,7 +177,7 @@ function Activity(props: any) {
               rel="noopener noreferrer"
             >
               <Eye strokeWidth={2} size={15} className="text-gray-600" />
-            </Link>
+            </LocaleLink>
           </div>
           <div className="flex flex-row pe-3 space-x-1 items-center">
             <MoreVertical size={15} className="text-gray-300" />

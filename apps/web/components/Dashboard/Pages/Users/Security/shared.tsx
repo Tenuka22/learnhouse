@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, ShieldAlert } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -415,7 +415,7 @@ export function AdminMfaCallout({ href, message }: { href: string; message?: str
               'Otherwise the policy would lock you out of your own organization the moment it saves, and no admin would be left to turn it back off.',
           })}
         </p>
-        <Link
+        <LocaleLink
           href={href}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-900 underline underline-offset-2 hover:text-amber-950"
         >
@@ -423,7 +423,7 @@ export function AdminMfaCallout({ href, message }: { href: string; message?: str
             defaultValue: 'Set up two-factor on your account',
           })}
           <ExternalLink className="w-3.5 h-3.5" />
-        </Link>
+        </LocaleLink>
       </div>
     </div>
   )

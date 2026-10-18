@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import Image from 'next/image'
 import {
   Cursor,
@@ -90,7 +90,7 @@ export default function BoardToolbar({
       }}
     >
       {/* Logo */}
-      <Link href="/dash/boards">
+      <LocaleLink href="/dash/boards">
         <div className="bg-black rounded-md w-[25px] h-[25px] flex items-center justify-center hover:opacity-80 transition-opacity">
           <Image
             src="/lrn.svg"
@@ -100,7 +100,7 @@ export default function BoardToolbar({
             className="invert"
           />
         </div>
-      </Link>
+      </LocaleLink>
 
       <DividerVerticalIcon style={{ color: 'grey', opacity: '0.5' }} />
 

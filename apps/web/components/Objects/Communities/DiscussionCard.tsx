@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -240,7 +240,7 @@ export function DiscussionCard({
                   {discussion.title}
                 </h3>
               ) : (
-                <Link
+                <LocaleLink
                   href={discussionLink}
                   onClick={onClick}
                   className="block group flex-1 min-w-0"
@@ -248,7 +248,7 @@ export function DiscussionCard({
                   <h3 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1" dir="auto">
                     {discussion.title}
                   </h3>
-                </Link>
+                </LocaleLink>
               )}
             </div>
 
@@ -266,9 +266,9 @@ export function DiscussionCard({
               {isSelectMode ? (
                 <span>{authorName}</span>
               ) : (
-                <Link href={discussionLink} className="hover:text-gray-700 hover:underline">
+                <LocaleLink href={discussionLink} className="hover:text-gray-700 hover:underline">
                   {authorName}
-                </Link>
+                </LocaleLink>
               )}
               <span className="text-gray-300">·</span>
               <span>{timeAgo}</span>

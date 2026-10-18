@@ -14,7 +14,7 @@ import { queryKeys } from '@/lib/query/keys'
 import { getCourseMetadata } from '@services/courses/courses'
 import { BookMinus, FilePenLine, Settings2, MoreVertical, Copy, Download, CheckSquare, Square, Lock } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React from 'react'
 import toast from 'react-hot-toast'
 import UserAvatar from '@components/Objects/UserAvatar'
@@ -183,7 +183,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
         isDashboard={isDashboard}
       />
 
-      <Link prefetch={false} href={courseLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
+      <LocaleLink prefetch={false} href={courseLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
         {/* Hidden img gives the browser a real resource hint so it can fetch the background-image early as an LCP candidate */}
         {isPriority && (
            
@@ -213,18 +213,18 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             )}
           </div>
         )}
-      </Link>
+      </LocaleLink>
 
       <div className="p-3 flex flex-col space-y-1.5">
         <div className="flex items-start justify-between">
-          <Link
+          <LocaleLink
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
             className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
            dir="auto">
             {course.name}
-          </Link>
+          </LocaleLink>
         </div>
         
         {course.description && (
@@ -271,14 +271,14 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             )}
           </div>
           
-          <Link
+          <LocaleLink
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
             className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
           >
             {t('courses.start_learning')}
-          </Link>
+          </LocaleLink>
         </div>
       </div>
     </div>
@@ -316,14 +316,14 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCo
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)} className="flex items-center cursor-pointer">
+              <LocaleLink prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)} className="flex items-center cursor-pointer">
                 <FilePenLine className="me-2 h-4 w-4" /> {t('courses.edit_content')}
-              </Link>
+              </LocaleLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)} className="flex items-center cursor-pointer">
+              <LocaleLink prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)} className="flex items-center cursor-pointer">
                 <Settings2 className="me-2 h-4 w-4" /> {t('common.settings')}
-              </Link>
+              </LocaleLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <ConfirmationModal

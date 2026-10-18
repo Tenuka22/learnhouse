@@ -2,7 +2,7 @@
 import React from 'react';
 import { Lock, ShoppingCart } from 'lucide-react';
 import { Button } from '@components/ui/button';
-import Link from 'next/link';
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLHAnalytics, useTrackView, AnalyticsEvent } from '@services/analytics';
@@ -88,7 +88,7 @@ function PaymentWall({ offer, resourceName, resourceThumbnail, orgslug }: Paymen
           <p className="text-sm text-gray-500">{offer.offer_name}</p>
         </div>
 
-        <Link
+        <LocaleLink
           href={storeHref}
           onClick={() => track(AnalyticsEvent.PaywallGetAccessClicked, { offer_id: offer.offer_id, amount: offer.amount })}
         >
@@ -96,7 +96,7 @@ function PaymentWall({ offer, resourceName, resourceThumbnail, orgslug }: Paymen
             <ShoppingCart size={16} />
             <span>Get Access</span>
           </Button>
-        </Link>
+        </LocaleLink>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { MarkdownLogo } from '@phosphor-icons/react'
 import React, { useMemo, memo, useState, useRef, useEffect, useCallback } from 'react'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useCourseCertification } from '@components/Hooks/useCourseCertification'
@@ -183,7 +183,7 @@ const CertificationBadge = memo(({
       </div>
     }
   >
-    <Link
+    <LocaleLink
       href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/end`}
       prefetch={false}
       className={`shrink-0 flex items-center cursor-pointer focus:outline-none transition-all ${
@@ -197,7 +197,7 @@ const CertificationBadge = memo(({
       }`}>
         <Trophy size={10} />
       </div>
-    </Link>
+    </LocaleLink>
   </ToolTip>
 )});
 
@@ -267,7 +267,7 @@ const MobileChapterSelector = memo(({
                   const activityId = activity.activity_uuid.replace('activity_', '')
 
                   return (
-                    <Link
+                    <LocaleLink
                       key={activity.activity_uuid}
                       href={getUriWithOrg(orgslug, '') + `/course/${courseid}/activity/${activityId}`}
                       prefetch={false}
@@ -284,7 +284,7 @@ const MobileChapterSelector = memo(({
                       <ActivityTypeIcon activityType={activity.activity_type} activitySubType={activity.activity_sub_type} />
                       <span className="truncate">{activity.name}</span>
                       {isDone && <Check size={12} className="text-teal-500 ms-auto shrink-0" />}
-                    </Link>
+                    </LocaleLink>
                   )
                 })}
               </div>
@@ -528,7 +528,7 @@ function ActivityIndicators(props: Props) {
                   }
                 >
                   {chapterLinkHref ? (
-                    <Link href={chapterLinkHref} prefetch={false} className="relative z-10 shrink-0 flex items-center cursor-pointer focus:outline-none">
+                    <LocaleLink href={chapterLinkHref} prefetch={false} className="relative z-10 shrink-0 flex items-center cursor-pointer focus:outline-none">
                       <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
                         isChapterComplete
                           ? 'bg-teal-500 text-white'
@@ -536,7 +536,7 @@ function ActivityIndicators(props: Props) {
                       }`}>
                         {chapterIndex + 1}
                       </div>
-                    </Link>
+                    </LocaleLink>
                   ) : (
                     <div className="relative z-10 shrink-0 flex items-center cursor-not-allowed">
                       <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
@@ -569,7 +569,7 @@ function ActivityIndicators(props: Props) {
                         }
                         key={activity.activity_uuid}
                       >
-                        <Link
+                        <LocaleLink
                           prefetch={false}
                           href={
                             getUriWithOrg(orgslug, '') +
@@ -583,7 +583,7 @@ function ActivityIndicators(props: Props) {
                           <div
                             className={`h-[7px] ${getActivityClass(activity)} ${isLast ? 'rounded-e-full' : ''} transition-all hover:brightness-110`}
                           ></div>
-                        </Link>
+                        </LocaleLink>
                       </ToolTip>
                     )
                   })}

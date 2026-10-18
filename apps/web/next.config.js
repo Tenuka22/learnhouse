@@ -58,6 +58,29 @@ const internalApiOrigin = (
   process.env.LEARNHOUSE_INTERNAL_API_URL || 'http://127.0.0.1:9000'
 ).replace(/\/+$/, '')
 
+/**
+ * Every language the app ships, as a path-to-regexp alternation.
+ *
+ * Derived from locales/*.json rather than hardcoded, so the `/:locale/...`
+ * header rules below can never drift out of sync with the translations that
+ * actually exist. Throws on an empty/missing directory instead of emitting
+ * `/:locale()/...`, which would silently match nothing.
+ */
+const localeCodes = fs
+  .readdirSync(path.join(__dirname, 'locales'))
+  .filter((name) => name.endsWith('.json'))
+  .map((name) => path.basename(name, '.json'))
+  // path-to-regexp alternation is pipe-separated; a template literal would
+  // otherwise hand it `en,fr,de` and match nothing.
+  .sort()
+  .join('|')
+if (localeCodes.length === 0) {
+  throw new Error(
+    'apps/web/locales contains no .json files; the /:locale/... header rules ' +
+      'would be generated empty and stop matching.'
+  )
+}
+
 /** @type {import('common.next').NextConfig} */
 const nextConfig = {
   // Required by PostHog's reverse-proxy rewrites below so the trailing-slash
@@ -136,6 +159,10 @@ const nextConfig = {
         // (subdomain tenancy: /course/...) and the internal /orgs/:slug/... form
         // are covered so the override applies regardless of how the tenancy
         // proxy rewrites the path before it reaches Next.
+        //
+        // Every user-facing page now sits under a locale prefix, so each public
+        // form needs its `/:locale/...` twin or localized pages would keep the
+        // global DENY and fail to frame.
         source: '/:kind(board|course|podcast|community|playground)/:path*',
         headers: [
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -143,7 +170,24 @@ const nextConfig = {
         ],
       },
       {
+        // `/:locale/...` twin of the public resource form above. The codes are
+        // read from locales/ so adding a language can't leave the header rules
+        // pointing at a prefix that no longer matches.
+        source: `/:locale(${localeCodes})/:kind(board|course|podcast|community|playground)/:path*`,
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+        ],
+      },
+      {
         source: '/orgs/:orgslug/:kind(board|course|podcast|community|playground)/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+        ],
+      },
+      {
+        source: `/:locale(${localeCodes})/orgs/:orgslug/:kind(board|course|podcast|community|playground)/:path*`,
         headers: [
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },

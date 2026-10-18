@@ -12,7 +12,7 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { removeUserFromOrg, removeUsersFromOrg, updateUserRole } from '@services/organizations/orgs'
 import { apiFetch } from '@services/utils/ts/requests'
 import { LogOut, Search, ChevronLeft, ChevronRight, Shield, User, Crown, Users, CheckCircle2, XCircle, Mail, Globe, ArrowUp, ArrowDown, X, Filter, Download, BarChart3, GitCompare, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useParams } from 'next/navigation'
 import { getUriWithOrg, getUpgradeUrl } from '@services/config/config'
 import { Dialog, DialogContent } from '@components/ui/dialog'
@@ -301,14 +301,14 @@ function OrgUsers() {
                       side="top"
                     >
                       {billingUrl ? (
-                        <Link
+                        <LocaleLink
                           href={billingUrl}
                           className="text-sm px-3 py-1.5 rounded-lg font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
                         >
                           {t('dashboard.users.active_users.beyond_included', {
                             count: data.active_users_summary.members_beyond_included,
                           })}
-                        </Link>
+                        </LocaleLink>
                       ) : (
                         <div className="text-sm px-3 py-1.5 rounded-lg font-medium bg-amber-50 text-amber-700">
                           {t('dashboard.users.active_users.beyond_included', {
@@ -750,12 +750,12 @@ function OrgUsers() {
                               <span>{t('dashboard.users.analytics.button')}</span>
                             </button>
                             <ToolTip content={t('dashboard.users.analytics.open_full_page')} side="top">
-                              <Link
+                              <LocaleLink
                                 href={getUriWithOrg(params.orgslug, '') + `/dash/users/analytics/${user.user.id}`}
                                 className="inline-flex items-center justify-center h-8 w-8 bg-white text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-md nice-shadow transition-all"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
-                              </Link>
+                              </LocaleLink>
                             </ToolTip>
                           {canManageOrg && (
                             <ConfirmationModal

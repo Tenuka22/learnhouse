@@ -8,6 +8,7 @@ import { AlertTriangle, Trash2, Users, Eraser, Loader2 } from 'lucide-react'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { useTranslation } from 'react-i18next'
+import { useLocalizedPath } from '@components/Contexts/LocaleContext'
 import {
   deleteOrganizationFromBackend,
   removeAllUsersFromOrg,
@@ -15,6 +16,7 @@ import {
 } from '@services/organizations/orgs'
 
 const OrgEditDangerZone: React.FC = () => {
+  const lp = useLocalizedPath()
   const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -86,7 +88,7 @@ const OrgEditDangerZone: React.FC = () => {
       // The org no longer exists; send the user back to the root so they land
       // on org selection / login rather than a broken dashboard.
       setTimeout(() => {
-        window.location.href = '/'
+        window.location.href = lp('/')
       }, 800)
     } catch (err: any) {
       toast.error(err?.message || 'Failed to delete organization', { id: loadingToast })

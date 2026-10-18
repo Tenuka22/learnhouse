@@ -11,7 +11,7 @@ import UserAvatar from '../../UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useTranslation } from 'react-i18next'
 import { formatCurrency } from '@/lib/format'
@@ -308,7 +308,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                       </div>
                     </div>
                   </div>
-                  <Link href={storeHref}>
+                  <LocaleLink href={storeHref}>
                     <button
                       onClick={() => track(AnalyticsEvent.CourseOfferCtaClicked, {
                         offer_uuid: offer.offer_uuid,
@@ -321,7 +321,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                       <ShoppingCart className="w-4 h-4" />
                       {formattedPrice ? `Get Access for ${formattedPrice}` : 'Purchase Course'}
                     </button>
-                  </Link>
+                  </LocaleLink>
                 </>
               )}
             </div>

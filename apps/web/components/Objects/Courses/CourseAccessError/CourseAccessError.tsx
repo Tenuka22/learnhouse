@@ -1,5 +1,5 @@
 'use client'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React from 'react'
 import { usePathname } from 'next/navigation'
 import { LogIn } from 'lucide-react'
@@ -32,19 +32,19 @@ function CourseAccessError({ error, orgslug }: CourseAccessErrorProps) {
             {t('course.signInRequired')}
           </h2>
           <p className="text-gray-500 mb-6">{t('course.signInRequiredDescription')}</p>
-          <Link
+          <LocaleLink
             href={getUriWithOrg(orgslug, `/login?redirect=${encodeURIComponent(redirect)}`)}
             className="inline-flex items-center gap-2 rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-black/90"
           >
             <LogIn size={16} />
             {t('course.signInToContinue')}
-          </Link>
-          <Link
+          </LocaleLink>
+          <LocaleLink
             href={getUriWithOrg(orgslug, '/courses')}
             className="mt-4 text-sm text-gray-500 hover:underline"
           >
             {t('course.backToCourses', 'Back to Courses')}
-          </Link>
+          </LocaleLink>
         </div>
       </GeneralWrapperStyled>
     )
@@ -61,9 +61,9 @@ function CourseAccessError({ error, orgslug }: CourseAccessErrorProps) {
             ? t('course.noPermission', 'You do not have permission to view this course.')
             : t('course.loadError', 'This course could not be found or there was an error loading it.')}
         </p>
-        <Link href={getUriWithOrg(orgslug, '/courses')} className="text-blue-600 hover:underline">
+        <LocaleLink href={getUriWithOrg(orgslug, '/courses')} className="text-blue-600 hover:underline">
           {t('course.backToCourses', 'Back to Courses')}
-        </Link>
+        </LocaleLink>
       </div>
     </GeneralWrapperStyled>
   )

@@ -9,7 +9,7 @@ import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useQueryClient } from '@tanstack/react-query'
 import { Trash2, FilePenLine, Settings2, MoreVertical, Play, Headphones } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React from 'react'
 import toast from 'react-hot-toast'
 import UserAvatar from '@components/Objects/UserAvatar'
@@ -105,7 +105,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
         isDashboard={isDashboard}
       />
 
-      <Link prefetch href={podcastLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
+      <LocaleLink prefetch href={podcastLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
         <div
           className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
@@ -134,17 +134,17 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
             {podcast.episode_count} {podcast.episode_count === 1 ? 'episode' : 'episodes'}
           </div>
         )}
-      </Link>
+      </LocaleLink>
 
       <div className="p-3 flex flex-col space-y-1.5">
         <div className="flex items-start justify-between">
-          <Link
+          <LocaleLink
             href={podcastLink}
             onClick={handleCardOpen}
             className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
            dir="auto">
             {podcast.name}
-          </Link>
+          </LocaleLink>
         </div>
 
         {podcast.description && (
@@ -191,13 +191,13 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
             )}
           </div>
 
-          <Link
+          <LocaleLink
             href={podcastLink}
             onClick={handleCardOpen}
             className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
           >
             {t('podcasts.listen_now')}
-          </Link>
+          </LocaleLink>
         </div>
       </div>
     </div>
@@ -231,14 +231,14 @@ const AdminEditOptions = ({ podcast, orgSlug, deletePodcast, isDashboard = false
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuItem asChild>
-              <Link prefetch href={getUriWithOrg(orgSlug, `/dash/podcasts/podcast/${removePodcastPrefix(podcast.podcast_uuid)}/content`)} className="flex items-center cursor-pointer">
+              <LocaleLink prefetch href={getUriWithOrg(orgSlug, `/dash/podcasts/podcast/${removePodcastPrefix(podcast.podcast_uuid)}/content`)} className="flex items-center cursor-pointer">
                 <FilePenLine className="me-2 h-4 w-4" /> {t('podcasts.edit_content')}
-              </Link>
+              </LocaleLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link prefetch href={getUriWithOrg(orgSlug, `/dash/podcasts/podcast/${removePodcastPrefix(podcast.podcast_uuid)}/general`)} className="flex items-center cursor-pointer">
+              <LocaleLink prefetch href={getUriWithOrg(orgSlug, `/dash/podcasts/podcast/${removePodcastPrefix(podcast.podcast_uuid)}/general`)} className="flex items-center cursor-pointer">
                 <Settings2 className="me-2 h-4 w-4" /> {t('common.settings')}
-              </Link>
+              </LocaleLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <ConfirmationModal

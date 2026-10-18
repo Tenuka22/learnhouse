@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { getCertificateByUuid } from '@services/courses/certifications';
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { Shield, CheckCircle, XCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import LocaleLink from '@components/Utils/LocaleLink'
 import { getUriWithOrg, getAbsoluteUriWithOrg } from '@services/config/config';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -137,13 +137,13 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             </div>
             
             <div className="pt-4">
-              <Link
+              <LocaleLink
                 href="/"
                 className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Go Home</span>
-              </Link>
+              </LocaleLink>
             </div>
           </div>
         </div>
@@ -268,7 +268,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
                 {/* View Course Link */}
                 <div className="flex-shrink-0">
-                  <Link
+                  <LocaleLink
                     href={getUriWithOrg(org?.org_slug || '', `/course/${certificateData.course.course_uuid.replace('course_', '')}`)}
                     className="inline-flex items-center space-x-1 text-neutral-400 hover:text-neutral-600 transition-colors text-sm"
                   >
@@ -276,7 +276,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                  </Link>
+                  </LocaleLink>
                 </div>
               </div>
             </div>
@@ -356,13 +356,13 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <Link
+          <LocaleLink
             href="/"
             className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Go Home</span>
-          </Link>
+          </LocaleLink>
         </div>
       </div>
     </div>

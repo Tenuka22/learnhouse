@@ -2,7 +2,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag } from '@phosphor-icons/react'
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
-import Link from 'next/link'
+import LocaleLink from '@components/Utils/LocaleLink'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
@@ -77,7 +77,7 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
           return it.external ? (
             <a key={it.key} href={it.href} target="_blank" rel="noopener noreferrer">{content}</a>
           ) : (
-            <Link key={it.key} href={it.href}>{content}</Link>
+            <LocaleLink key={it.key} href={it.href}>{content}</LocaleLink>
           )
         })}
       </ul>
