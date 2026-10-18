@@ -22,9 +22,7 @@
   };
 
   var KNOWN = {
-    en: 1, fr: 1, de: 1, es: 1, ar: 1, ja: 1, pt: 1, ru: 1, zh: 1,
-    hi: 1, ko: 1, it: 1, tr: 1, vi: 1, id: 1, pl: 1, uk: 1, nl: 1,
-    th: 1, bn: 1, fa: 1, sk: 1, si: 1,
+    en: 1, si: 1, ta: 1,
   };
 
   // Unprefixed surfaces: /api and /embed keep their original URLs by contract,
@@ -37,26 +35,53 @@
     } catch { return ''; }
   }
 
+  /**
+   * Only accept a stored language we still ship.
+   *
+   * A browser can hold `i18nextLng=fr` long after French is removed, and
+   * honouring it would paint an English page as lang="fr" until the bundle
+   * loaded. Anything not in KNOWN is dropped here so the page falls through to
+   * the real detection instead.
+   */
+  function known(code) {
+    var base = String(code || '').split('-')[0].toLowerCase();
+    return KNOWN[base] ? base : '';
+  }
+
   function detect() {
     var fromPath = pathLocale();
     if (fromPath) return fromPath;
 
     try {
-      var stored = localStorage.getItem('i18nextLng');
+      var stored = known(localStorage.getItem('i18nextLng'));
       if (stored) return stored;
     } catch { /* private mode / sandboxed iframe */ }
 
     var cookie = document.cookie.match(/(?:^|;\s*)i18next=([^;]*)/);
     if (cookie) {
-      try { return decodeURIComponent(cookie[1]) } catch { /* malformed */ }
+      try {
+        var fromCookie = known(decodeURIComponent(cookie[1]));
+        if (fromCookie) return fromCookie;
+      } catch { /* malformed */ }
     }
 
     try {
       var qs = new URLSearchParams(location.search).get('lng');
-      if (qs) return qs;
+      var fromQuery = known(qs);
+      if (fromQuery) return fromQuery;
     } catch { /* malformed query string */ }
 
-    return (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+    // Prefer a shipped language out of the browser list before giving up, so a
+    // visitor whose Accept-Language is, say, de-AT still lands somewhere real.
+    var langs = navigator.languages && navigator.languages.length
+      ? navigator.languages
+      : [navigator.language];
+    for (var i = 0; i < langs.length; i++) {
+      var match = known(langs[i]);
+      if (match) return match;
+    }
+
+    return 'en';
   }
 
   var code = String(detect() || 'en').split('-')[0].toLowerCase();

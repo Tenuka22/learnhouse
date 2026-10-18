@@ -32,7 +32,9 @@ describe('locale normalisation', () => {
   test('regional tags collapse to the base code', () => {
     expect(normalizeLocale('si-LK')).toBe('si')
     expect(normalizeLocale('en-GB')).toBe('en')
-    expect(normalizeLocale('PT-br')).toBe('pt')
+    expect(normalizeLocale('TA-in')).toBe('ta')
+    // A locale we used to ship is now just another unsupported code.
+    expect(normalizeLocale('PT-br')).toBeNull()
   })
 
   // An unknown prefix must NOT silently become English: /xx/home should 404
@@ -56,21 +58,28 @@ describe('locale paths', () => {
     expect(stripLocale('/singer/page')).toBe('/singer/page')
   })
 
+  // Only en/si/ta ship. An unknown code must be left alone rather than
+  // producing a prefix that 404s.
+  test('an unsupported locale is a no-op', () => {
+    expect(localizePath('/home', 'fr')).toBe('/home')
+    expect(swapLocalePath('/si/home', 'fr')).toBe('/si/home')
+  })
+
   test('prefixes a bare app path', () => {
     expect(localizePath('/home', 'si')).toBe('/si/home')
     expect(localizePath('/', 'si')).toBe('/si')
-    expect(localizePath('/orgs/acme/courses', 'fr')).toBe('/fr/orgs/acme/courses')
+    expect(localizePath('/orgs/acme/courses', 'ta')).toBe('/ta/orgs/acme/courses')
   })
 
   test('is idempotent and swaps instead of stacking', () => {
     expect(localizePath('/si/home', 'si')).toBe('/si/home')
     expect(localizePath('/en/home', 'si')).toBe('/si/home')
-    expect(localizePath('/si/home', 'fr')).toBe('/fr/home')
+    expect(localizePath('/si/home', 'ta')).toBe('/ta/home')
   })
 
   test('preserves query and hash', () => {
     expect(localizePath('/search?q=a#top', 'si')).toBe('/si/search?q=a#top')
-    expect(localizePath('/si/search?q=a#top', 'fr')).toBe('/fr/search?q=a#top')
+    expect(localizePath('/si/search?q=a#top', 'ta')).toBe('/ta/search?q=a#top')
     // Same-page reference: nothing to localize.
     expect(localizePath('#top', 'si')).toBe('#top')
   })
@@ -112,9 +121,9 @@ describe('byte-stable surfaces', () => {
 
 describe('switchLocalePath', () => {
   test('keeps the page and only changes the language', () => {
-    expect(swapLocalePath('/si/orgs/acme/courses', 'fr')).toBe('/fr/orgs/acme/courses')
-    expect(swapLocalePath('/si', 'fr')).toBe('/fr')
-    expect(swapLocalePath('/fr/orgs/acme', 'fr')).toBe('/fr/orgs/acme')
+    expect(swapLocalePath('/si/orgs/acme/courses', 'ta')).toBe('/ta/orgs/acme/courses')
+    expect(swapLocalePath('/si', 'ta')).toBe('/ta')
+    expect(swapLocalePath('/ta/orgs/acme', 'ta')).toBe('/ta/orgs/acme')
   })
 
   test('prefixes an unprefixed path rather than dropping it', () => {

@@ -6,29 +6,14 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import en from '../locales/en.json';
 import { loadDateLocale } from './format';
 
+// English is bundled below; Sinhala and Tamil are lazy-loaded on demand.
+// Keep this in step with AVAILABLE_LANGUAGES in lib/locale-registry.ts — a
+// language in the registry with no loader here can never be selected, and one
+// with a loader but no registry can never be reached. tests/rtl-guard asserts
+// the two agree.
 const LOCALE_LOADERS: Record<string, () => Promise<{ default: any }>> = {
-  fr: () => import('../locales/fr.json'),
-  de: () => import('../locales/de.json'),
-  es: () => import('../locales/es.json'),
-  ar: () => import('../locales/ar.json'),
-  ja: () => import('../locales/ja.json'),
-  pt: () => import('../locales/pt.json'),
-  ru: () => import('../locales/ru.json'),
-  zh: () => import('../locales/zh.json'),
-  hi: () => import('../locales/hi.json'),
-  ko: () => import('../locales/ko.json'),
-  it: () => import('../locales/it.json'),
-  tr: () => import('../locales/tr.json'),
-  vi: () => import('../locales/vi.json'),
-  id: () => import('../locales/id.json'),
-  pl: () => import('../locales/pl.json'),
-  uk: () => import('../locales/uk.json'),
-  nl: () => import('../locales/nl.json'),
-  th: () => import('../locales/th.json'),
-  bn: () => import('../locales/bn.json'),
-  fa: () => import('../locales/fa.json'),
-  sk: () => import('../locales/sk.json'),
   si: () => import('../locales/si.json'),
+  ta: () => import('../locales/ta.json'),
 };
 
 // Only bundle English; lazy-load all other locales on demand
